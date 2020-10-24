@@ -7,46 +7,45 @@ uint64_t timeSinceEpochMillisec() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
+
 template <typename T>
-void PrintVector(std::vector<T> const vec) {
-    for(auto i =vec.begin(); i!=vec.end(); i++)
+void PrintVector(T* const arr, int const size) {
+    
+    for(T i=0; i<size; i++)
     {
-        std::cout << *i << " ";
+        std::cout << arr[i] << " ";
     }
 
     std::cout << std::endl;
 }
 
-
-std::vector<int> RandomPermutation(int const n) {
+int * RandomPermutation(int const n) {
     srand(timeSinceEpochMillisec());
-    std::vector<int> vec;
+    int *arr = new int[n];
 
-    // inicjalizacja wektora 
+    // inicjalizacja tablicy 
     for (int i = 0; i < n; i++)
-    {
-        vec.push_back(i);
-    }
+        arr[i] = i;
 
     // losowanie permutacji
+    int temp;
     for (int i = 0; i < n; i++)
     {
-        int randomIndex = rand() % (n-i); // (n-i), bo po usunieciu elementu przesuwamy index w lewo
-        vec.push_back(vec[randomIndex]); // dodajemy wylosownay element na koniec
-        vec.erase(vec.begin() + randomIndex); // // usuwamy wylosowany element
+        temp = arr[n-1-i]; // zawsze zamieniamy ostatnia wartosc w kazdej iteracji przesuwajac sie w lewo
+        int randomIndex = rand() % (n-i); // (n-i), bo po usunieciu elementu przesuwamy index w lewo   
+        arr[n-1-i] = arr[randomIndex]; // zamiana ostatniej wartosci na wylosowana
+        arr[randomIndex] = temp;
     }
 
-    // PrintVector(vec);
-
-    return vec;
+    return arr;
 }
-
 template <typename T, typename... Args>
-double MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, T func, Args&&... args) {
+void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, T func, Args&&... args) {
     int counter = 0;
     uint64_t start = timeSinceEpochMillisec();
     do {
-            std::vector<int> randomPermutation = func(std::forward<Args>(args)...); // funkcja do zmierzenia
+            int* randomPermutation = func(std::forward<Args>(args)...); // funkcja do zmierzenia
+            delete [] randomPermutation;
             counter++;
     } while (timeSinceEpochMillisec() - start < testDurtionInSecs*1000);
 
@@ -55,15 +54,23 @@ double MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, T func, Args&&
     std::cout << x << std::endl;
     std::cout << counter<< std::endl;
     double result = double(x)/double(counter);
-    return result;
+
+    std::cout << result << "ms" << std::endl;
+
 
 }
 
 int main() {
-    double timeInMilliSeconds = MeasureTimeOfFunctionInMilliSeconds(5, RandomPermutation, 5);
-    std::cout << timeInMilliSeconds << std::endl;
-    // std::vector<int> randomPermutation = RandomPermutation(5);
-    // PrintVector(randomPermutation);
+    MeasureTimeOfFunctionInMilliSeconds(10, RandomPermutation, 5000);
+    // int* randomPermutation = RandomPermutation(5);
+    // PrintVector(randomPermutation, 5);
+    // delete [] randomPermutation;
+    // for(int i=0; i<10;i++)
+    // {
+    //     std::vector<int> randomPermutation = RandomPermutation(5);
+    //     PrintVector(randomPermutation);
+    // }
+
 
 } 
 
