@@ -46,6 +46,11 @@
         "chrono": "cpp",
         "ctime": "cpp",
         "ratio": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "iomanip": "cpp",
+        "ranges": "cpp"
     }
 }
