@@ -10,6 +10,9 @@ int Greedy(std::string filepath, int nOfCities)
 
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
+    // int *parentDistancesArray;
+    // int *neighbourPermutation = new int[nOfCities];
+    // int *neighbourDistancesArray;
     int parentValue;
     int neighbourValue;
 
@@ -18,7 +21,8 @@ int Greedy(std::string filepath, int nOfCities)
     bool done = false;
     while (!done)
     {
-        // std::cout << "Current result: " << parentValue << std::endl;
+
+        std::cout << "Current result: " << parentValue << std::endl;
 
         //// generowanie całego sasiedztwa - to pewnie trzeba użyć do steepest i wtedy już łatwo.
         // Matrix neighbourhood = GenerateNeighbourhood(currentPermutation, nOfCities);
@@ -26,16 +30,30 @@ int Greedy(std::string filepath, int nOfCities)
         for (int i = 0; i < nOfCities; i++)
         {
             for (int j = 1 + i; j < nOfCities; j++)
+            // for (size_t i = 0; i < nOfNeighbours; i++)
             {
+                // neighbourPermutation = GenerateNeighbour(currentPermutation, nOfCities, i + 1, swappedIndexes);
+                // neighbourPermutation = new int[nOfCities];
                 int *neighbourPermutation = new int[nOfCities];
                 std::copy(currentPermutation, currentPermutation + nOfCities, neighbourPermutation);
                 std::swap(neighbourPermutation[i], neighbourPermutation[j]);
-                int swappedIndexes[] = {i, j};
-                int *neighbourDistancesArray = GetArrayOfDistancesUsingParentPermutation(neighbourPermutation, parentDistancesArray, &distanceMatrix, swappedIndexes, nOfCities);
                 // int *neighbourDistancesArray = GetArrayOfDistances(neighbourPermutation, nOfCities, &distanceMatrix);
+                int swappedIndexes[] = {i, j};
+                std::cout << "i: " << i << "\tj: " << j << std::endl;
+                std::cout << "currentPermutation" << std::endl;
+                PrintVector(currentPermutation, nOfCities);
 
+                std::cout << "neighbourPermutation" << std::endl;
+                PrintVector(neighbourPermutation, nOfCities);
+                std::cout << "parentDistancesArray" << std::endl;
+                PrintVector(parentDistancesArray, nOfCities);
+                int *neighbourDistancesArray = GetArrayOfDistancesUsingParentPermutation(neighbourPermutation, parentDistancesArray, &distanceMatrix, swappedIndexes, nOfCities);
+
+                std::cout << "neighbourDistancesArray" << std::endl;
+                PrintVector(neighbourDistancesArray, nOfCities);
                 neighbourValue = SumOfarray(neighbourDistancesArray, nOfCities);
-
+                std::cout << "neighbourValue: " << neighbourValue << "\tparentValue: " << parentValue << std::endl;
+                
                 if (neighbourValue < parentValue)
                 {
                     delete[] currentPermutation;
@@ -44,6 +62,7 @@ int Greedy(std::string filepath, int nOfCities)
                     currentPermutation = neighbourPermutation;
                     parentValue = neighbourValue;
                     isBetterResult = true;
+                    return 1;
                     break;
                 }
                 else if (i == nOfCities - 2 && j == nOfCities - 1)
@@ -56,9 +75,8 @@ int Greedy(std::string filepath, int nOfCities)
             if (isBetterResult)
                 break;
         }
-        
+        delete[] parentDistancesArray;
     }
-    delete[] parentDistancesArray;
 
     std::cout << "Finally Greedy result: " << parentValue << std::endl;
     return parentValue;
@@ -68,12 +86,15 @@ int main(int argc, char **argv)
 {
     std::string filepath = argv[1];
     int nOfCities = std::stoi(argv[2]);
+    int x = std::stoi(argv[3]);
+    int y = std::stoi(argv[4]);
     std::cout << "PLIK: " << filepath << std::endl;
     std::cout << "LICZBA MIAST: " << nOfCities << std::endl;
 
-    //// wczytanie danych
-    // Matrix distanceMatrix = LoadData(filepath=filepath, nOfCities=nOfCities);
-    // std::cout << distanceMatrix;
+    // wczytanie danych
+    Matrix distanceMatrix = LoadData(filepath=filepath, nOfCities=nOfCities);
+    // std::cout << distanceMatrix << std::endl;
+    std::cout << distanceMatrix.GetValue(x,y) << std::endl;
 
     //// mierzenie czasu funkcji RandomPermutation(5000)
     // MeasureTimeOfFunctionInMilliSeconds(1, RandomPermutation, 1000000);
@@ -83,5 +104,5 @@ int main(int argc, char **argv)
     // PrintVector(randomPermutation, 5);
     // delete [] randomPermutation;
 
-    MeasureTimeOfFunctionInMilliSeconds(1, Greedy, filepath, nOfCities);
+    // MeasureTimeOfFunctionInMilliSeconds(1, Greedy, filepath, nOfCities);
 }

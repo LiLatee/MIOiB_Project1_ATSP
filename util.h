@@ -119,17 +119,23 @@ Matrix GenerateNeighbourhood(int arr[], int size)
     return result;
 }
 
+
 /**
  * Generuje jednego sąsiada. Wartość `numberOfNeighbour` wskazuje, który z kolei ma być to sąsiad.
+ * TODO: np. sizeOfArr=5, czyli arr.size=5 i numberOfNeighbour=5 to std::div(numberOfNeighbour, sizeOfArr) -> quot=1 and rem=0
+ * to wykonujemy std::swap(result[1], result[1]), co jest bez sensu
  */ 
-int *GenerateNeighbour(int arr[], int sizeOfArr, int numberOfNeighbour)
+int *GenerateNeighbour(int arr[], int sizeOfArr, int numberOfNeighbour, int swappedIndexes[])
 {
     int sizeOfNeighbourhood = (sizeOfArr * (sizeOfArr - 1)) / 2;
     int *result = new int[sizeOfArr];
 
     std::copy(arr, arr + sizeOfArr, result);
     div_t divResult = std::div(numberOfNeighbour, sizeOfArr);
-    std::swap(result[divResult.rem], result[divResult.quot]);
+    swappedIndexes[0] = divResult.rem+divResult.quot;
+    swappedIndexes[1] = divResult.quot;
+    std::cout << swappedIndexes[0] << "\t" << swappedIndexes[1] << std::endl;
+    std::swap(result[swappedIndexes[0]], result[swappedIndexes[1]]);
 
     return result;
 }
@@ -139,16 +145,58 @@ int *GenerateNeighbour(int arr[], int sizeOfArr, int numberOfNeighbour)
  */ 
 int *GetArrayOfDistances(int arr[], int size, Matrix *distanceMatrix)
 {
-    int *result = new int[size - 1];
+    int *result = new int[size];
     for (size_t i = 1; i < size; i++)
     {
         int distance = (*distanceMatrix).GetValue(arr[i - 1], arr[i]);
         result[i - 1] = distance;
     }
+
+    // dodanie odleglosci laczacej ostatni z pierwszym
+    int distance = (*distanceMatrix).GetValue(arr[size-1], arr[0]);
+    result[size-1] = distance;
     return result;
 }
 
-int SumOfarray(int *arr, int size)
+int *GetArrayOfDistancesUsingParentPermutation(int neighbourPermutation[], int parentDistancesArray[], Matrix *distanceMatrix, int swappedIndexes[], int nOfCities)
+{
+    // TODO zwracac zmienione parentDistancesArray
+    int *result = new int[43];
+    std::copy(parentDistancesArray, parentDistancesArray +43, result);
+    for (int i = 0; i < 2; i++)
+    {   
+        int newValue;
+        // std::cout << "swappedIndexes = " << swappedIndexes[i] << std::endl;
+        int firstChangedValueIndex = swappedIndexes[i]-1;
+        if (firstChangedValueIndex == -1)
+        {
+            firstChangedValueIndex = nOfCities-1;
+            // newValue = distanceMatrix->GetValue(neighbourPermutation[firstChangedValueIndex], neighbourPermutation[swappedIndexes[i]]);
+        }
+        newValue = distanceMatrix->GetValue(neighbourPermutation[firstChangedValueIndex], neighbourPermutation[swappedIndexes[i]]);
+        // std::cout << neighbourPermutation[firstChangedValueIndex] << "\t" << neighbourPermutation[swappedIndexes[i]] << "=" <<  newValue << "\tdla firstChangedValueIndex= "<< firstChangedValueIndex << std::endl;
+
+        result[firstChangedValueIndex] = newValue;
+
+
+        int secondChangedValueIndex = swappedIndexes[i]+1;
+        if (secondChangedValueIndex == nOfCities)
+        {
+            secondChangedValueIndex = 0;
+            // newValue = distanceMatrix->GetValue(neighbourPermutation[swappedIndexes[i]], neighbourPermutation[secondChangedValueIndex]);
+        } 
+
+        newValue = distanceMatrix->GetValue(neighbourPermutation[swappedIndexes[i]], neighbourPermutation[secondChangedValueIndex]);
+        // std::cout << neighbourPermutation[swappedIndexes[i]] << "\t" << neighbourPermutation[secondChangedValueIndex] << "=" <<  newValue <<  "\tdla secondChangedValueIndex= "<< secondChangedValueIndex <<std::endl;
+
+        result[swappedIndexes[i]] = newValue;
+    }
+    return result;
+}
+
+
+
+int SumOfarray(int arr[], int size)
 {
     return std::accumulate(arr, arr + size, 0, std::plus<int>());
 }
