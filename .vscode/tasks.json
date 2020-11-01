@@ -1,28 +1,65 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "shell",
-			"label": "C/C++: g++.exe build active file",
-			"command": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
-			"args": [
-				// "--std=c++17",
-				// "-lstdc++fs",
-				"-g",
-				"${file}",
-				"-o",
-				"${fileDirname}\\${fileBasenameNoExtension}.exe"
-			],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        // {
+        //     "type": "shell",
+        //     "label": "C/C++: g++.exe build active file",
+        //     "command": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
+        //     "args": [
+        //         // "--std=c++17",
+        //         // "-lstdc++fs",
+        //         "-g",
+        //         "${file}",
+        //         "-o",
+        //         "${fileDirname}\\${fileBasenameNoExtension}.exe"
+        //     ],
+        //     "options": {
+        //         "cwd": "${workspaceFolder}"
+        //     },
+        //     "problemMatcher": [
+        //         "$gcc"
+        //     ],
+        //     "group": "build"
+        // },
+        {
+            "type": "shell",
+            "label": "C/C++: g++-10 build active file",
+            "command": "/usr/bin/g++-10",
+            "args": [
+                "-g",
+                "${file}",
+                "/mnt/d/Dokumenty/Uczelnia/MIOiB/Project1_ATSP/matrix.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "C/C++: g++-9 build active file",
+            "command": "/usr/bin/g++-9",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
 }

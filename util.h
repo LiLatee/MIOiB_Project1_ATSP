@@ -98,10 +98,34 @@ Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
     exit(0);
 }
 
+struct Pair {
+    int first;
+    int second;
+
+    Pair() {
+        this->first = 0;
+        this->second = 0;
+    }
+    Pair(int first, int second) {
+        this->first = first;
+        this->second = second;
+    }
+
+    int& operator[](int index) {
+        if (index == 0) return this->first;
+        else if(index == 1) return this->second;
+        else {
+            std::cout << "Object pair has only 0 and 1 indexes.";
+            exit(0);
+        }
+    }
+
+
+};
 /**
  * Generuje wszystkich sąsiadow dla pemrutacji `arr`.
  */
-Matrix GenerateWhole_2OPT(int arr[], int size)
+Matrix GenerateWhole_2OPT(int arr[], int size, Pair* pairs)
 {
     int size_of_neighbourhood = (size * (size - 1)) / 2;
     Matrix result = Matrix(size_of_neighbourhood, size);
@@ -114,7 +138,8 @@ Matrix GenerateWhole_2OPT(int arr[], int size)
             std::copy(arr, arr + size, neighbour);
             std::swap(neighbour[i], neighbour[j]);
             result.SetRow(cntOfNeighbours, neighbour);
-            cntOfNeighbours++;
+            pairs[cntOfNeighbours] = Pair(i, j);
+            cntOfNeighbours++;    
         }
     }
 
@@ -151,7 +176,7 @@ int *GetArrayOfDistances(int arr[], int size, Matrix *distanceMatrix)
  * więc tylko te 4 wartości w tablicy odległości rodzica zmieniamy
  * 
  */
-int *GetArrayOfDistancesUsingParentPermutation(int neighbourPermutation[], int parentDistancesArray[], Matrix *distanceMatrix, int swappedIndexes[], int nOfCities)
+int *GetArrayOfDistancesUsingParentPermutation(int neighbourPermutation[], int parentDistancesArray[], Matrix *distanceMatrix, Pair swappedIndexes, int nOfCities)
 {
     int *result = new int[nOfCities];
     std::copy(parentDistancesArray, parentDistancesArray + nOfCities, result);

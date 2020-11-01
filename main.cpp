@@ -22,4 +22,8 @@ int main(int argc, char **argv)
     result = SimpleHeur(distanceMatrix, nOfCities);
     std::cout << "SimpleHeur: " << result << std::endl;
 
+    result = Steepest(distanceMatrix, nOfCities);
+    std::cout << "Steepest: " << result << std::endl;
+
+
 }
