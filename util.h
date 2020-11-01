@@ -6,12 +6,11 @@
 #include <sstream>
 #include <numeric>
 #include <regex>
-// #include <filesystem>
 #include "matrix.h"
+
 #ifndef UTIL_H_
 #define UTIL_H_
 
-// namespace fs = std::filesystem;
 
 uint64_t TimeSinceEpochMillisec()
 {
@@ -48,7 +47,7 @@ int *RandomPermutation(int const n)
     return arr;
 }
 template <typename T, typename... Args>
-void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, T func, Args &&... args)
+void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, std::string funcName, T func, Args &&... args)
 {
     int counter = 0;
     uint64_t start = TimeSinceEpochMillisec();
@@ -59,11 +58,11 @@ void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, T func, Args &&.
     } while (TimeSinceEpochMillisec() - start < testDurtionInSecs * 1000);
 
     int x = (TimeSinceEpochMillisec() - start);
-    std::cout << x << std::endl;
-    std::cout << counter << std::endl;
+    // std::cout << x << std::endl;
+    // std::cout << counter << std::endl;
     double result = double(x) / double(counter);
 
-    std::cout << result << "ms" << std::endl;
+    std::cout << "Czas dla: " << funcName << "\t" << result << " ms" << std::endl;
 }
 
 Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
@@ -76,7 +75,7 @@ Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
         for (int i = 0; i < 7; i++)
         {
             std::getline(file, line);
-            if (std::regex_match(line, std::regex("DIMENSION: [0-9].")))
+            if (std::regex_match(line, std::regex("DIMENSION:[ ]*[0-9].")))
             {
                 std::smatch m;
                 std::regex_search(line, m, std::regex("[0-9]."));
@@ -102,7 +101,7 @@ Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
 /**
  * Generuje wszystkich sąsiadow dla pemrutacji `arr`.
  */
-Matrix GenerateNeighbourhood(int arr[], int size)
+Matrix GenerateWhole_2OPT(int arr[], int size)
 {
     int size_of_neighbourhood = (size * (size - 1)) / 2;
     Matrix result = Matrix(size_of_neighbourhood, size);
@@ -118,26 +117,6 @@ Matrix GenerateNeighbourhood(int arr[], int size)
             cntOfNeighbours++;
         }
     }
-
-    return result;
-}
-
-/**
- * Generuje jednego sąsiada. Wartość `numberOfNeighbour` wskazuje, który z kolei ma być to sąsiad.
- * TODO: np. sizeOfArr=5, czyli arr.size=5 i numberOfNeighbour=5 to std::div(numberOfNeighbour, sizeOfArr) -> quot=1 and rem=0
- * to wykonujemy std::swap(result[1], result[1]), co jest bez sensu
- */
-int *GenerateNeighbour(int arr[], int sizeOfArr, int numberOfNeighbour, int swappedIndexes[])
-{
-    int sizeOfNeighbourhood = (sizeOfArr * (sizeOfArr - 1)) / 2;
-    int *result = new int[sizeOfArr];
-
-    std::copy(arr, arr + sizeOfArr, result);
-    div_t divResult = std::div(numberOfNeighbour, sizeOfArr);
-    swappedIndexes[0] = divResult.rem + divResult.quot;
-    swappedIndexes[1] = divResult.quot;
-    std::cout << swappedIndexes[0] << "\t" << swappedIndexes[1] << std::endl;
-    std::swap(result[swappedIndexes[0]], result[swappedIndexes[1]]);
 
     return result;
 }
