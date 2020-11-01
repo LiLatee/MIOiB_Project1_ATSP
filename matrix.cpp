@@ -5,12 +5,15 @@ Matrix::Matrix(int rows, int cols)
 {
     m_rows = rows;
     m_cols = cols;
-    m_matrix = new int[m_rows*m_cols];
+    m_matrix = new int[m_rows * m_cols];
 }
 
-Matrix::~Matrix()
+Matrix::Matrix(const Matrix &oldMatrix)
 {
-   delete [] m_matrix;
+    m_rows = oldMatrix.m_rows;
+    m_cols = oldMatrix.m_cols;
+    m_matrix = new int[m_rows * m_cols];
+    std::copy(oldMatrix.m_matrix, oldMatrix.m_matrix + m_rows * m_cols, m_matrix);
 }
 
 void Matrix::Print()
@@ -22,19 +25,20 @@ void Matrix::Print()
         for (int j = 0; j < m_cols; j++)
         {
             cout << m_matrix[GetIndex(i, j)] << '\t';
-            if (j == m_cols-1) cout << endl;
+            if (j == m_cols - 1)
+                cout << endl;
         }
     }
 }
 
-int* Matrix::GetRow(int row)
+int *Matrix::GetRow(int row)
 {
-    int* result = new int[m_cols];
-    std::copy(&m_matrix[row*m_cols], &m_matrix[row*m_cols+m_cols], result);
+    int *result = new int[m_cols];
+    std::copy(&m_matrix[row * m_cols], &m_matrix[row * m_cols + m_cols], result);
     return result;
 }
 
-std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
+std::ostream &operator<<(std::ostream &os, const Matrix &matrix)
 {
     using namespace std;
 
@@ -42,12 +46,11 @@ std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
     {
         for (int j = 0; j < matrix.GetNOfCols(); j++)
         {
-            
+
             os << matrix.GetValue(i, j) << '\t';
-            if (j == matrix.GetNOfCols()-1) os << endl;
+            if (j == matrix.GetNOfCols() - 1)
+                os << endl;
         }
     }
     return os;
 }
-
-

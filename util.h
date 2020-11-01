@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <numeric>
+#include <regex>
 // #include <filesystem>
 #include "matrix.h"
 #ifndef UTIL_H_
@@ -47,7 +48,7 @@ int *RandomPermutation(int const n)
     return arr;
 }
 template <typename T, typename... Args>
-void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, T func, Args&&... args)
+void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, T func, Args &&... args)
 {
     int counter = 0;
     uint64_t start = TimeSinceEpochMillisec();
@@ -65,40 +66,42 @@ void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, T func, Args&&..
     std::cout << result << "ms" << std::endl;
 }
 
-Matrix LoadData(std::string const filepath, int const n)
+Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
 {
     std::ifstream file(filepath);
-    Matrix matrix = Matrix(n, n);
-
-    // int counter = 1;
     if (file.is_open())
     {
         std::string line;
-        // omijamy pierwsze 6 linii
+        // // omijamy pierwsze 6 linii
         for (int i = 0; i < 7; i++)
-            std::getline(file, line);
-
-        for (int i = 0; i < n; i++)
         {
             std::getline(file, line);
-            // zamiana stringa zawierajacego linie tekstu z pliku na strumien i dzialanie na jak zwyklym pliku
-            std::istringstream iss = std::istringstream(line);
-            std::string word;
-            for (int j = 0; j < n; j++)
+            if (std::regex_match(line, std::regex("DIMENSION: [0-9].")))
             {
-                iss >> word;
-                matrix.SetValue(i, j, std::stoi(word));
+                std::smatch m;
+                std::regex_search(line, m, std::regex("[0-9]."));
+                nOfCitiesOut = std::stoi(m[0]);
             }
         }
+        std::cout << "LICZBA MIAST: " << nOfCitiesOut << std::endl;
+        Matrix matrix = Matrix(nOfCitiesOut, nOfCitiesOut);
+        std::string word;
+        for (int i = 0; i < nOfCitiesOut; i++)
+            for (int j = 0; j < nOfCitiesOut; j++)
+            {
+                file >> word;
+                matrix.SetValue(i, j, std::stoi(word));
+            }
         file.close();
+        return matrix;
     }
-
-    return matrix;
+    std::cout << "Nie udało się wczytać pliku!" << std::endl;
+    exit(0);
 }
 
 /**
  * Generuje wszystkich sąsiadow dla pemrutacji `arr`.
- */ 
+ */
 Matrix GenerateNeighbourhood(int arr[], int size)
 {
     int size_of_neighbourhood = (size * (size - 1)) / 2;
@@ -119,12 +122,11 @@ Matrix GenerateNeighbourhood(int arr[], int size)
     return result;
 }
 
-
 /**
  * Generuje jednego sąsiada. Wartość `numberOfNeighbour` wskazuje, który z kolei ma być to sąsiad.
  * TODO: np. sizeOfArr=5, czyli arr.size=5 i numberOfNeighbour=5 to std::div(numberOfNeighbour, sizeOfArr) -> quot=1 and rem=0
  * to wykonujemy std::swap(result[1], result[1]), co jest bez sensu
- */ 
+ */
 int *GenerateNeighbour(int arr[], int sizeOfArr, int numberOfNeighbour, int swappedIndexes[])
 {
     int sizeOfNeighbourhood = (sizeOfArr * (sizeOfArr - 1)) / 2;
@@ -132,7 +134,7 @@ int *GenerateNeighbour(int arr[], int sizeOfArr, int numberOfNeighbour, int swap
 
     std::copy(arr, arr + sizeOfArr, result);
     div_t divResult = std::div(numberOfNeighbour, sizeOfArr);
-    swappedIndexes[0] = divResult.rem+divResult.quot;
+    swappedIndexes[0] = divResult.rem + divResult.quot;
     swappedIndexes[1] = divResult.quot;
     std::cout << swappedIndexes[0] << "\t" << swappedIndexes[1] << std::endl;
     std::swap(result[swappedIndexes[0]], result[swappedIndexes[1]]);
@@ -142,7 +144,7 @@ int *GenerateNeighbour(int arr[], int sizeOfArr, int numberOfNeighbour, int swap
 
 /**
  * Zwraca tablice wartości odległości między miastami w permutacji `arr`.
- */ 
+ */
 int *GetArrayOfDistances(int arr[], int size, Matrix *distanceMatrix)
 {
     int *result = new int[size];
@@ -153,48 +155,52 @@ int *GetArrayOfDistances(int arr[], int size, Matrix *distanceMatrix)
     }
 
     // dodanie odleglosci laczacej ostatni z pierwszym
-    int distance = (*distanceMatrix).GetValue(arr[size-1], arr[0]);
-    result[size-1] = distance;
+    int distance = (*distanceMatrix).GetValue(arr[size - 1], arr[0]);
+    result[size - 1] = distance;
     return result;
 }
 
+/**
+ * Zwraca tablice wartości odległości między miastami w permutacji `neighbourPermutation`. 
+ * Ale nie oblicza całego wyniku od nowa tylko same zmiany względem odległości rodzica `parentDistancesArray`.
+ * Gdy zamieniamy 2 elementy ze są w permutacji to zmieniają się 4 wartości w tablicy odległości.
+ * np. z permutacji 12345 do 14325 zamiana 2 z 4 powoduje że zmieniają się odległości 
+ * z 1 do 2 --> z 1 do 4
+ * z 2 do 3 --> z 4 do 3
+ * z 3 do 4 --> z 3 do 2
+ * z 4 do 5 --> z 2 do 5
+ * więc tylko te 4 wartości w tablicy odległości rodzica zmieniamy
+ * 
+ */
 int *GetArrayOfDistancesUsingParentPermutation(int neighbourPermutation[], int parentDistancesArray[], Matrix *distanceMatrix, int swappedIndexes[], int nOfCities)
 {
-    // TODO zwracac zmienione parentDistancesArray
-    int *result = new int[43];
-    std::copy(parentDistancesArray, parentDistancesArray +43, result);
+    int *result = new int[nOfCities];
+    std::copy(parentDistancesArray, parentDistancesArray + nOfCities, result);
+    // iterujemy po 2 zmienionych idenksach odpowiadajacych indeksom zamienionych elemntow
     for (int i = 0; i < 2; i++)
-    {   
+    {
         int newValue;
-        // std::cout << "swappedIndexes = " << swappedIndexes[i] << std::endl;
-        int firstChangedValueIndex = swappedIndexes[i]-1;
-        if (firstChangedValueIndex == -1)
-        {
-            firstChangedValueIndex = nOfCities-1;
-            // newValue = distanceMatrix->GetValue(neighbourPermutation[firstChangedValueIndex], neighbourPermutation[swappedIndexes[i]]);
-        }
-        newValue = distanceMatrix->GetValue(neighbourPermutation[firstChangedValueIndex], neighbourPermutation[swappedIndexes[i]]);
-        // std::cout << neighbourPermutation[firstChangedValueIndex] << "\t" << neighbourPermutation[swappedIndexes[i]] << "=" <<  newValue << "\tdla firstChangedValueIndex= "<< firstChangedValueIndex << std::endl;
 
+        // indeks elementu przed zamienionym elementem
+        int firstChangedValueIndex = swappedIndexes[i] - 1;
+        // jeżeli pierwszy zamieniony element to pierwsza wartość permtutacji to jego zmiana wpływa na ostatni element permutacji
+        // bo osttani element łączy sie z pierwszym
+        if (firstChangedValueIndex == -1)
+            firstChangedValueIndex = nOfCities - 1;
+        newValue = distanceMatrix->GetValue(neighbourPermutation[firstChangedValueIndex], neighbourPermutation[swappedIndexes[i]]);
         result[firstChangedValueIndex] = newValue;
 
-
-        int secondChangedValueIndex = swappedIndexes[i]+1;
+        // indeks elementu po zamienionym elemencie
+        int secondChangedValueIndex = swappedIndexes[i] + 1;
+        // to samo co wyżej, ale sprawdzamy czy to nie jest osttani element, który wpływ ana pierwszy
         if (secondChangedValueIndex == nOfCities)
-        {
             secondChangedValueIndex = 0;
-            // newValue = distanceMatrix->GetValue(neighbourPermutation[swappedIndexes[i]], neighbourPermutation[secondChangedValueIndex]);
-        } 
-
         newValue = distanceMatrix->GetValue(neighbourPermutation[swappedIndexes[i]], neighbourPermutation[secondChangedValueIndex]);
-        // std::cout << neighbourPermutation[swappedIndexes[i]] << "\t" << neighbourPermutation[secondChangedValueIndex] << "=" <<  newValue <<  "\tdla secondChangedValueIndex= "<< secondChangedValueIndex <<std::endl;
 
         result[swappedIndexes[i]] = newValue;
     }
     return result;
 }
-
-
 
 int SumOfarray(int arr[], int size)
 {

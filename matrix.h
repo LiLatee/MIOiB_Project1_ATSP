@@ -11,7 +11,8 @@ private:
 
 public:
     Matrix(int rows, int cols);
-    ~Matrix();
+    ~Matrix() { delete[] m_matrix; };
+    Matrix(const Matrix& oldMatrix);
     size_t GetIndex(int row, int column) const { return m_rows * row + column; }
     int GetValue(int row, int column) const { return m_matrix[GetIndex(row, column)]; }
     int GetNOfRows() const { return m_rows; }

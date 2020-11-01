@@ -2,11 +2,12 @@
 #include "matrix.h"
 #include "util.h"
 
-int Greedy(std::string filepath, int nOfCities)
+int Greedy(std::string filepath)
 {
+    
+    int nOfCities = 0;
+    Matrix distanceMatrix = LoadData(filepath, nOfCities);
     const int nOfNeighbours = (nOfCities * (nOfCities - 1)) / 2;
-
-    Matrix distanceMatrix = LoadData(filepath = filepath, nOfCities = nOfCities);
 
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
@@ -67,12 +68,9 @@ int Greedy(std::string filepath, int nOfCities)
 int main(int argc, char **argv)
 {
     std::string filepath = argv[1];
-    int nOfCities = std::stoi(argv[2]);
     std::cout << "PLIK: " << filepath << std::endl;
-    std::cout << "LICZBA MIAST: " << nOfCities << std::endl;
-
     //// wczytanie danych
-    // Matrix distanceMatrix = LoadData(filepath=filepath, nOfCities=nOfCities);
+    // Matrix distanceMatrix = LoadData(filepath);
     // std::cout << distanceMatrix;
 
     //// mierzenie czasu funkcji RandomPermutation(5000)
@@ -83,5 +81,5 @@ int main(int argc, char **argv)
     // PrintVector(randomPermutation, 5);
     // delete [] randomPermutation;
 
-    MeasureTimeOfFunctionInMilliSeconds(1, Greedy, filepath, nOfCities);
+    MeasureTimeOfFunctionInMilliSeconds(1, Greedy, filepath);
 }
