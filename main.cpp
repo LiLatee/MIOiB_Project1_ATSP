@@ -7,7 +7,6 @@ int Greedy(std::string filepath)
     
     int nOfCities = 0;
     Matrix distanceMatrix = LoadData(filepath, nOfCities);
-    const int nOfNeighbours = (nOfCities * (nOfCities - 1)) / 2;
 
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
