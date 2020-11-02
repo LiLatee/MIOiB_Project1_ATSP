@@ -8,7 +8,10 @@
 int Greedy(Matrix distanceMatrix, int nOfCities)
 {
     // initial random permutation
-    int *currentPermutation = RandomPermutation(nOfCities);
+    // int *currentPermutation = RandomPermutation(nOfCities);
+    int* currentPermutation = new int[nOfCities];
+    std::iota(currentPermutation, currentPermutation + nOfCities, 0);
+
     int parentValue;
     int neighbourValue;
 
@@ -29,7 +32,7 @@ int Greedy(Matrix distanceMatrix, int nOfCities)
                 int *neighbourPermutation = new int[nOfCities];
                 std::copy(currentPermutation, currentPermutation + nOfCities, neighbourPermutation);
                 std::swap(neighbourPermutation[i], neighbourPermutation[j]);
-                Pair swappedIndexes = Pair(i, j);
+                Pair<int> swappedIndexes = Pair<int>(i, j);
                 int *neighbourDistancesArray = GetArrayOfDistancesUsingParentPermutation(neighbourPermutation, parentDistancesArray, &distanceMatrix, swappedIndexes, nOfCities);
                 // int *neighbourDistancesArray = GetArrayOfDistances(neighbourPermutation, nOfCities, &distanceMatrix);
 
@@ -58,7 +61,7 @@ int Greedy(Matrix distanceMatrix, int nOfCities)
     }
     delete[] parentDistancesArray;
 
-    std::cout << "Finally Greedy result: " << parentValue << std::endl;
+    // std::cout << "Finally Greedy result: " << parentValue << std::endl;
     return parentValue;
 }
 
@@ -75,7 +78,7 @@ int Steepest(Matrix distanceMatrix, int nOfCities)
         // std::cout << "Current result: " << parentValue << std::endl;
 
         int sizeOfNeighbourhood = (nOfCities*(nOfCities-1)/2);
-        Pair *swappedIndexes = new Pair[sizeOfNeighbourhood];
+        Pair<int> *swappedIndexes = new Pair<int>[sizeOfNeighbourhood];
         Matrix neighbourhood = GenerateWhole_2OPT(currentPermutation, nOfCities, swappedIndexes);
 
         int neighbourValue;
@@ -113,7 +116,7 @@ int Steepest(Matrix distanceMatrix, int nOfCities)
     
     }
 
-    std::cout << "Finally Steepest result: " << currentPermutationValue << std::endl;
+    // std::cout << "Finally Steepest result: " << currentPermutationValue << std::endl;
     return currentPermutationValue;
 }
 

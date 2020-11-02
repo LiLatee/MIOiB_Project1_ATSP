@@ -31,7 +31,6 @@ void PrintVector(T *const arr, int const size)
 
 int *RandomPermutation(int const n)
 {
-    srand(TimeSinceEpochMillisec());
     int *arr = new int[n];
 
     std::iota(arr, arr + n, 0);
@@ -47,7 +46,7 @@ int *RandomPermutation(int const n)
     return arr;
 }
 template <typename T, typename... Args>
-void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, std::string funcName, T func, Args &&... args)
+void MeasureTimeOfFunctionInMilliSeconds(int testDurationInSecs, std::string funcName, T func, Args &&... args)
 {
     int counter = 0;
     uint64_t start = TimeSinceEpochMillisec();
@@ -55,7 +54,7 @@ void MeasureTimeOfFunctionInMilliSeconds(int testDurtionInSecs, std::string func
     {
         func(std::forward<Args>(args)...); // funkcja do zmierzenia czasu
         counter++;
-    } while (TimeSinceEpochMillisec() - start < testDurtionInSecs * 1000);
+    } while (TimeSinceEpochMillisec() - start < testDurationInSecs * 1000);
 
     int x = (TimeSinceEpochMillisec() - start);
     // std::cout << x << std::endl;
@@ -69,17 +68,18 @@ Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
 {
     std::ifstream file(filepath);
     if (file.is_open())
-    {
+    {   
         std::string line;
         // // omijamy pierwsze 6 linii
         for (int i = 0; i < 7; i++)
-        {
+        {   
             std::getline(file, line);
-            if (std::regex_match(line, std::regex("DIMENSION:[ ]*[0-9].")))
+            if (std::regex_match(line, std::regex("^DIMENSION:[ ]*[0-9]+")))
             {
                 std::smatch m;
-                std::regex_search(line, m, std::regex("[0-9]."));
+                std::regex_search(line, m, std::regex("[0-9]+"));
                 nOfCitiesOut = std::stoi(m[0]);
+                std::cout << std::stoi(m[0]) << std::endl;
             }
         }
         std::cout << "LICZBA MIAST: " << nOfCitiesOut << std::endl;
@@ -94,38 +94,80 @@ Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
         file.close();
         return matrix;
     }
-    std::cout << "Nie udało się wczytać pliku!" << std::endl;
-    exit(0);
+    else
+    {
+        std::cout << "Nie udało się wczytać pliku: " << filepath << std::endl;
+        exit(0);
+    }
 }
 
-struct Pair {
-    int first;
-    int second;
+template<typename T>
+struct Pair
+{
+    T first;
+    T second;
 
-    Pair() {
-        this->first = 0;
-        this->second = 0;
+    Pair()
+    {
+        this->first = T();
+        this->second = T();
     }
-    Pair(int first, int second) {
+    Pair(T first, T second)
+    {
         this->first = first;
         this->second = second;
     }
 
-    int& operator[](int index) {
-        if (index == 0) return this->first;
-        else if(index == 1) return this->second;
-        else {
+    T &operator[](int index)
+    {
+        if (index == 0)
+            return this->first;
+        else if (index == 1)
+            return this->second;
+        else
+        {
             std::cout << "Object pair has only 0 and 1 indexes.";
             exit(0);
         }
     }
 
-
 };
+
+void LoadOptimalResults(std::string const filepath, Pair<std::string>* optimalresultsOut)
+{
+    std::ifstream file(filepath);
+
+    if (file.is_open())
+    {
+        std::string line;
+        int cnt = 0;
+        while (std::getline(file, line))
+        {   
+            std::string word;
+            std::istringstream stream;
+            stream.str(line);
+
+            std::string setName;
+            stream >> setName;
+            std::string setOptimalResult;
+            stream >> setOptimalResult;
+
+            optimalresultsOut[cnt++] = Pair<std::string>(setName, setOptimalResult);
+            // std::cout << pair.first << "\t" << pair.second << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Nie udało się wczytać pliku: " << filepath << std::endl;
+        exit(0);
+    }
+}
+
+
 /**
  * Generuje wszystkich sąsiadow dla pemrutacji `arr`.
  */
-Matrix GenerateWhole_2OPT(int arr[], int size, Pair* pairs)
+Matrix GenerateWhole_2OPT(int arr[], int size, Pair<int> *pairs)
 {
     int size_of_neighbourhood = (size * (size - 1)) / 2;
     Matrix result = Matrix(size_of_neighbourhood, size);
@@ -138,8 +180,8 @@ Matrix GenerateWhole_2OPT(int arr[], int size, Pair* pairs)
             std::copy(arr, arr + size, neighbour);
             std::swap(neighbour[i], neighbour[j]);
             result.SetRow(cntOfNeighbours, neighbour);
-            pairs[cntOfNeighbours] = Pair(i, j);
-            cntOfNeighbours++;    
+            pairs[cntOfNeighbours] = Pair<int>(i, j);
+            cntOfNeighbours++;
         }
     }
 
@@ -176,7 +218,7 @@ int *GetArrayOfDistances(int arr[], int size, Matrix *distanceMatrix)
  * więc tylko te 4 wartości w tablicy odległości rodzica zmieniamy
  * 
  */
-int *GetArrayOfDistancesUsingParentPermutation(int neighbourPermutation[], int parentDistancesArray[], Matrix *distanceMatrix, Pair swappedIndexes, int nOfCities)
+int *GetArrayOfDistancesUsingParentPermutation(int neighbourPermutation[], int parentDistancesArray[], Matrix *distanceMatrix, Pair<int> swappedIndexes, int nOfCities)
 {
     int *result = new int[nOfCities];
     std::copy(parentDistancesArray, parentDistancesArray + nOfCities, result);
