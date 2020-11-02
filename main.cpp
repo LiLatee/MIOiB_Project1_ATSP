@@ -33,19 +33,20 @@ int main(int argc, char **argv)
 
     // MeasureTimeOfFunctionInMilliSeconds(1, "Greedy",  Greedy, distanceMatrix, nOfCities);
     // MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities);
-    MeasureTimeOfFunctionInMilliSeconds(10, "SteepestV2", SteepestV2, distanceMatrix, nOfCities);
+    
+    MeasureTimeOfFunctionInMilliSeconds(1, "Greedy", Greedy, distanceMatrix, nOfCities);
+    MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities);
 
-    // int result = Greedy(distanceMatrix, nOfCities);
-    // std::cout << "Greedy: " << result << std::endl;
+
 
     // result = SimpleHeur(distanceMatrix, nOfCities);
     // std::cout << "SimpleHeur: " << result << std::endl;
 
-    // result = Steepest(distanceMatrix, nOfCities);
-    // std::cout << "Steepest: " << result << std::endl;
+    int result = Greedy(distanceMatrix, nOfCities);
+    std::cout << "Greedy: " << result << std::endl;
 
-    // std::vector<Pair<std::string>> result = LoadOptimalResults("./data/unpacked_ready/optimal_results.csv");
-    // std::cout << result[0].first << std::endl;
+    result = Steepest(distanceMatrix, nOfCities);
+    std::cout << "Steepest: " << result << std::endl;
 
     // RunFuncNTimes(3, Greedy, distanceMatrix, nOfCities);
 }
