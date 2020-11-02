@@ -11,7 +11,6 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-
 uint64_t TimeSinceEpochMillisec()
 {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -35,14 +34,15 @@ int *RandomPermutation(int const n)
 
     std::iota(arr, arr + n, 0);
 
-    // losowanie permutacji
-    int temp;
-    for (int i = 0; i < n; i++)
-    {
-        int randomIndex = rand() % (n - i); // (n-i), bo po usunieciu elementu przesuwamy index w lewo
-        std::swap(arr[n - 1 - i], arr[randomIndex]);
-    }
+    // TODO ODKOMENTOWAĆ
 
+    // losowanie permutacji
+    // int temp;
+    // for (int i = 0; i < n; i++)
+    // {
+    //     int randomIndex = rand() % (n - i); // (n-i), bo po usunieciu elementu przesuwamy index w lewo
+    //     std::swap(arr[n - 1 - i], arr[randomIndex]);
+    // }
     return arr;
 }
 template <typename T, typename... Args>
@@ -68,11 +68,11 @@ Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
 {
     std::ifstream file(filepath);
     if (file.is_open())
-    {   
+    {
         std::string line;
         // // omijamy pierwsze 6 linii
         for (int i = 0; i < 7; i++)
-        {   
+        {
             std::getline(file, line);
             if (std::regex_match(line, std::regex("^DIMENSION:[ ]*[0-9]+")))
             {
@@ -101,7 +101,7 @@ Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
     }
 }
 
-template<typename T>
+template <typename T>
 struct Pair
 {
     T first;
@@ -130,10 +130,9 @@ struct Pair
             exit(0);
         }
     }
-
 };
 
-void LoadOptimalResults(std::string const filepath, Pair<std::string>* optimalresultsOut)
+void LoadOptimalResults(std::string const filepath, Pair<std::string> *optimalresultsOut)
 {
     std::ifstream file(filepath);
 
@@ -142,7 +141,7 @@ void LoadOptimalResults(std::string const filepath, Pair<std::string>* optimalre
         std::string line;
         int cnt = 0;
         while (std::getline(file, line))
-        {   
+        {
             std::string word;
             std::istringstream stream;
             stream.str(line);
@@ -162,7 +161,6 @@ void LoadOptimalResults(std::string const filepath, Pair<std::string>* optimalre
         exit(0);
     }
 }
-
 
 /**
  * Generuje wszystkich sąsiadow dla pemrutacji `arr`.
@@ -204,6 +202,134 @@ int *GetArrayOfDistances(int arr[], int size, Matrix *distanceMatrix)
     int distance = (*distanceMatrix).GetValue(arr[size - 1], arr[0]);
     result[size - 1] = distance;
     return result;
+}
+
+int ComputePossibleValue(const int parentPermutation[], const int parentValue, const Matrix *distanceMatrix, const Pair<int> swappedIndexes, const int nOfCities)
+{
+    int possibleValue = parentValue;
+
+    int oldValue;
+    int newValue;
+    // std::cout << "swappedIndexes.first: " << swappedIndexes.first << "\tswappedIndexes.second: " << swappedIndexes.second << std::endl;
+    if (swappedIndexes.first == 0 && swappedIndexes.second == nOfCities - 1)
+    {
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[swappedIndexes.first]); // 1
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[swappedIndexes.second]); // 1
+        possibleValue += newValue;
+
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[swappedIndexes.first + 1]); // 2
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[swappedIndexes.first + 1]); // 2
+        possibleValue += newValue;
+
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second - 1], parentPermutation[swappedIndexes.second]); // 3
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second - 1], parentPermutation[swappedIndexes.first]); // 3
+        possibleValue += newValue;
+        return possibleValue;
+    }
+    else if (abs(swappedIndexes.first - swappedIndexes.second) == 1 && swappedIndexes.first != 0 && swappedIndexes.second != nOfCities - 1)
+    {
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first - 1], parentPermutation[swappedIndexes.first]); // 1
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first - 1], parentPermutation[swappedIndexes.second]); // 1
+        possibleValue += newValue;
+
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[swappedIndexes.second]); // 2
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[swappedIndexes.first]); // 2
+        possibleValue += newValue;
+
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[swappedIndexes.second + 1]); // 3
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[swappedIndexes.second + 1]); // 3
+        possibleValue += newValue;
+        return possibleValue;
+    } else if (swappedIndexes.first == 0 && swappedIndexes.second == 1)
+    {
+        oldValue = distanceMatrix->GetValue(parentPermutation[nOfCities-1], parentPermutation[swappedIndexes.first]); // 1
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[nOfCities-1], parentPermutation[swappedIndexes.second]); // 1
+        possibleValue += newValue;
+
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[swappedIndexes.second]); // 2
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[swappedIndexes.first]); // 2
+        possibleValue += newValue;
+
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[swappedIndexes.second + 1]); // 3
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[swappedIndexes.second + 1]); // 3
+        possibleValue += newValue;
+        return possibleValue;
+    } else if (swappedIndexes.first == nOfCities - 1 && swappedIndexes.second == nOfCities - 2)
+    {
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first-1], parentPermutation[swappedIndexes.first]); // 1
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first-1], parentPermutation[swappedIndexes.second]); // 1
+        possibleValue += newValue;
+
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[swappedIndexes.second]); // 2
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[swappedIndexes.first]); // 2
+        possibleValue += newValue;
+
+        oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[0]); // 3
+        possibleValue -= oldValue;
+        newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[0]); // 3
+        possibleValue += newValue;
+        return possibleValue;
+    } 
+
+
+    // indeks elementu przed zamienionym elementem
+    int firstChangedValueIndex = swappedIndexes.first - 1;
+    // jeżeli pierwszy zamieniony element to pierwsza wartość permtutacji to jego zmiana wpływa na ostatni element permutacji
+    // bo ostatni element łączy sie z pierwszym
+    if (firstChangedValueIndex == -1)
+    {
+        firstChangedValueIndex = nOfCities - 1;
+    }
+    oldValue = distanceMatrix->GetValue(parentPermutation[firstChangedValueIndex], parentPermutation[swappedIndexes.first]); //-a
+    possibleValue -= oldValue;
+    newValue = distanceMatrix->GetValue(parentPermutation[firstChangedValueIndex], parentPermutation[swappedIndexes.second]); //+a
+    possibleValue += newValue;
+
+
+    // to samo co wyżej, ale sprawdzamy czy to nie jest osttani element, który wpływ ana pierwszy
+    int secondChangedValueIndex = swappedIndexes.first + 1;
+    if (secondChangedValueIndex == nOfCities)
+        secondChangedValueIndex = 0;
+    oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[secondChangedValueIndex]); //-b
+    possibleValue -= oldValue;
+    newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[secondChangedValueIndex]); //+b
+    possibleValue += newValue;
+
+    // if (abs(swappedIndexes.first - swappedIndexes.second) != 1)
+    // {
+    // indeks elementu przed zamienionym elementem
+    firstChangedValueIndex = swappedIndexes.second - 1;
+    // jeżeli pierwszy zamieniony element to pierwsza wartość permtutacji to jego zmiana wpływa na ostatni element permutacji
+    // bo ostatni element łączy sie z pierwszym
+    if (firstChangedValueIndex == -1)
+        firstChangedValueIndex = nOfCities - 1;
+    oldValue = distanceMatrix->GetValue(parentPermutation[firstChangedValueIndex], parentPermutation[swappedIndexes.second]); //-c
+    possibleValue -= oldValue;
+    newValue = distanceMatrix->GetValue(parentPermutation[firstChangedValueIndex], parentPermutation[swappedIndexes.first]); //+c
+    possibleValue += newValue;
+    // }
+
+    // indeks elementu po zamienionym elemencie
+    secondChangedValueIndex = swappedIndexes.second + 1;
+    // to samo co wyżej, ale sprawdzamy czy to nie jest osttani element, który wpływ ana pierwszy
+    if (secondChangedValueIndex == nOfCities)
+        secondChangedValueIndex = 0;
+    oldValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.second], parentPermutation[secondChangedValueIndex]); //-d
+    possibleValue -= oldValue;
+    newValue = distanceMatrix->GetValue(parentPermutation[swappedIndexes.first], parentPermutation[secondChangedValueIndex]); //+d
+    possibleValue += newValue;
+    return possibleValue;
 }
 
 /**

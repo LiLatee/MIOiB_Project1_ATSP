@@ -31,9 +31,9 @@ int main(int argc, char **argv)
     Matrix distanceMatrix = LoadData(filepath, nOfCities);
     // std::cout << distanceMatrix;
 
-    MeasureTimeOfFunctionInMilliSeconds(1, "Greedy",  Greedy, distanceMatrix, nOfCities);
+    // MeasureTimeOfFunctionInMilliSeconds(1, "Greedy",  Greedy, distanceMatrix, nOfCities);
     // MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities);
-    // MeasureTimeOfFunctionInMilliSeconds(10, "Steepest", Steepest, distanceMatrix, nOfCities);
+    MeasureTimeOfFunctionInMilliSeconds(10, "SteepestV2", SteepestV2, distanceMatrix, nOfCities);
 
     // int result = Greedy(distanceMatrix, nOfCities);
     // std::cout << "Greedy: " << result << std::endl;

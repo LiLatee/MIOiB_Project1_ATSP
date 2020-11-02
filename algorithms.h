@@ -8,9 +8,7 @@
 int Greedy(Matrix distanceMatrix, int nOfCities)
 {
     // initial random permutation
-    // int *currentPermutation = RandomPermutation(nOfCities);
-    int* currentPermutation = new int[nOfCities];
-    std::iota(currentPermutation, currentPermutation + nOfCities, 0);
+    int *currentPermutation = RandomPermutation(nOfCities);
 
     int parentValue;
     int neighbourValue;
@@ -65,43 +63,136 @@ int Greedy(Matrix distanceMatrix, int nOfCities)
     return parentValue;
 }
 
+int GreedyV2(Matrix distanceMatrix, int nOfCities)
+{
+    // initial random permutation
+    int *currentPermutation = RandomPermutation(nOfCities);
+    int *currentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, &distanceMatrix);
+    int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
+    delete[] currentDistancesArray;
+    bool done = false;
+    int cnt = 0;
+    while (!done)
+    {
+        int neighbourValue;
+        // std::cout << "Current result: " << currentPermutationValue << std::endl;
 
-int Steepest(Matrix distanceMatrix, int nOfCities)
+        bool isBetterResult = false;
+        for (int i = 0; i < nOfCities; i++)
+        {
+            for (int j = 1 + i; j < nOfCities; j++)
+            {
+                int neighbourValue = ComputePossibleValue(currentPermutation, currentPermutationValue, &distanceMatrix, Pair<int>(i, j), nOfCities);
+                if (neighbourValue < currentPermutationValue)
+                {
+                    std::swap(currentPermutation[i], currentPermutation[j]);
+                    currentPermutationValue = neighbourValue;
+                    isBetterResult = true;
+                    break;
+                }
+                else if (i == nOfCities - 2 && j == nOfCities - 1)
+                    done = true;
+
+                isBetterResult = false;
+            }
+            if (isBetterResult)
+                break;
+        }
+    }
+
+    delete[] currentPermutation;
+    // std::cout << "Finally Greedy result: " << parentValue << std::endl;
+    return currentPermutationValue;
+}
+
+int SteepestV2(Matrix distanceMatrix, int nOfCities)
 {
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
     int *parentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, &distanceMatrix);
     int currentPermutationValue = SumOfarray(parentDistancesArray, nOfCities);
-    
+    delete[] parentDistancesArray;
+    int cnt = 0;
     while (true)
     {
         // std::cout << "Current result: " << parentValue << std::endl;
 
-        int sizeOfNeighbourhood = (nOfCities*(nOfCities-1)/2);
+        int sizeOfNeighbourhood = (nOfCities * (nOfCities - 1) / 2);
         Pair<int> *swappedIndexes = new Pair<int>[sizeOfNeighbourhood];
         Matrix neighbourhood = GenerateWhole_2OPT(currentPermutation, nOfCities, swappedIndexes);
 
         int neighbourValue;
 
-        int* currentBestInNeighbourhood = neighbourhood.GetRow(0); 
+        int *currentBestInNeighbourhood = neighbourhood.GetRow(0);
+        int currentBestInNeighbourhoodValue = INT32_MAX;
+        bool isChangedPermutaion = false;
+        int bestNeighbourIndex = 0;
+
+        for (int i = 0; i < sizeOfNeighbourhood; i++)
+        {   
+            int neighbourValue = ComputePossibleValue(currentPermutation, currentPermutationValue, &distanceMatrix, swappedIndexes[i], nOfCities);
+            if (neighbourValue < currentPermutationValue && neighbourValue < currentBestInNeighbourhoodValue)
+            {
+                delete[] currentBestInNeighbourhood;
+                currentBestInNeighbourhood = neighbourhood.GetRow(i);
+                currentBestInNeighbourhoodValue = neighbourValue;
+                isChangedPermutaion = true;
+                bestNeighbourIndex = i;
+            }
+        }
+
+        if (currentBestInNeighbourhoodValue < currentPermutationValue && isChangedPermutaion)
+        {
+            // currentPermutation = currentBestInNeighbourhood;
+            std::swap(currentPermutation[swappedIndexes[bestNeighbourIndex].first], currentPermutation[swappedIndexes[bestNeighbourIndex].second]);
+            currentPermutationValue = currentBestInNeighbourhoodValue;
+        }
+        else
+            break;
+    }
+
+    delete[] currentPermutation;
+    // std::cout << "Finally Steepest result: " << currentPermutationValue << std::endl;
+    return currentPermutationValue;
+}
+
+int Steepest(Matrix distanceMatrix, int nOfCities)
+{
+    // initial random permutation
+    int *currentPermutation = RandomPermutation(nOfCities);
+
+    int *parentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, &distanceMatrix);
+    int currentPermutationValue = SumOfarray(parentDistancesArray, nOfCities);
+    int cnt = 0;
+    while (true)
+    {
+        // std::cout << "Current result: " << parentValue << std::endl;
+
+        int sizeOfNeighbourhood = (nOfCities * (nOfCities - 1) / 2);
+        Pair<int> *swappedIndexes = new Pair<int>[sizeOfNeighbourhood];
+        Matrix neighbourhood = GenerateWhole_2OPT(currentPermutation, nOfCities, swappedIndexes);
+
+        int neighbourValue;
+
+        int *currentBestInNeighbourhood = neighbourhood.GetRow(0);
         int *currentBestDistancesArray = GetArrayOfDistances(neighbourhood.GetRow(0), nOfCities, &distanceMatrix);
         int currentBestInNeighbourhoodValue = SumOfarray(currentBestDistancesArray, nOfCities);
+
         bool isChangedPermutaion = false;
         for (int i = 1; i < sizeOfNeighbourhood; i++)
         {
-                int *neighbourDistancesArray = GetArrayOfDistancesUsingParentPermutation(neighbourhood.GetRow(i), parentDistancesArray, &distanceMatrix, swappedIndexes[i], nOfCities);
-                // int *neighbourDistancesArray = GetArrayOfDistances(neighbourhood.GetRow(i), nOfCities, &distanceMatrix);
-                neighbourValue = SumOfarray(neighbourDistancesArray, nOfCities);
-                if (neighbourValue < currentPermutationValue && neighbourValue < currentBestInNeighbourhoodValue)
-                {
-                    delete[] currentBestInNeighbourhood;
-                    delete[] currentBestDistancesArray;
-                    currentBestInNeighbourhood = neighbourhood.GetRow(i);
-                    currentBestInNeighbourhoodValue = neighbourValue;
-                    currentBestDistancesArray = neighbourDistancesArray;
-                    isChangedPermutaion = true;
-                    
-                }           
+            int *neighbourDistancesArray = GetArrayOfDistancesUsingParentPermutation(neighbourhood.GetRow(i), parentDistancesArray, &distanceMatrix, swappedIndexes[i], nOfCities);
+            // int *neighbourDistancesArray = GetArrayOfDistances(neighbourhood.GetRow(i), nOfCities, &distanceMatrix);
+            neighbourValue = SumOfarray(neighbourDistancesArray, nOfCities);
+            if (neighbourValue < currentPermutationValue && neighbourValue < currentBestInNeighbourhoodValue)
+            {
+                delete[] currentBestInNeighbourhood;
+                delete[] currentBestDistancesArray;
+                currentBestInNeighbourhood = neighbourhood.GetRow(i);
+                currentBestInNeighbourhoodValue = neighbourValue;
+                currentBestDistancesArray = neighbourDistancesArray;
+                isChangedPermutaion = true;
+            }
         }
 
         if (currentBestInNeighbourhoodValue < currentPermutationValue && isChangedPermutaion)
@@ -112,14 +203,13 @@ int Steepest(Matrix distanceMatrix, int nOfCities)
             parentDistancesArray = currentBestDistancesArray;
             currentPermutationValue = currentBestInNeighbourhoodValue;
         }
-        else break;
-    
+        else
+            break;
     }
 
     // std::cout << "Finally Steepest result: " << currentPermutationValue << std::endl;
     return currentPermutationValue;
 }
-
 
 int SimpleHeur(Matrix distanceMatrix, int nOfCities)
 {
@@ -130,11 +220,11 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities)
     int destinationCity = finallPath[1];
     int currentDistance = distanceMatrix.GetValue(currentCity, destinationCity);
     int possibleDistance = 0;
-    
-    while (icities < nOfCities-1)
+
+    while (icities < nOfCities - 1)
     {
         for (int i = icities; i < nOfCities; i++)
-        { 
+        {
             // sprawdzamy odległość do miasta
             possibleDistance = distanceMatrix.GetValue(currentCity, finallPath[i]);
             if (currentDistance > possibleDistance)
@@ -144,7 +234,7 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities)
             }
             // std::cout<<"for"<<i<<std::endl;
         }
-        
+
         // std::cout<<"distance: "<<currentDistance<<std::endl;
         distanceValue = distanceValue + currentDistance;
         std::swap(finallPath[icities], finallPath[destinationCity]);
