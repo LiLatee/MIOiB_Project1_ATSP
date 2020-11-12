@@ -44,7 +44,7 @@ int Random(Matrix distanceMatrix, int nOfCities, int timeInS)
 
 }
 
-int getCostDiffForNeighbour(int *arr,Matrix distanceMatrix, Pair swappedIndexes, int nOfCities){
+int getCostDiffForNeighbour(int *arr,Matrix distanceMatrix, Pair<int> swappedIndexes, int nOfCities){
     //first index new value
     // [i-1][i] oraz [i][i+1]
     int currentCost = 0 ;
@@ -83,7 +83,7 @@ int getCostDiffForNeighbour(int *arr,Matrix distanceMatrix, Pair swappedIndexes,
     //second index new value
 } 
 
-Pair getRandomNeighbour(int *arr, int nOfCities){
+Pair<int> getRandomNeighbour(int *arr, int nOfCities){
     
     int randomIndexFirst = rand() % nOfCities;
     int randomIndexSecond= 0;
