@@ -7,6 +7,7 @@
 #include <numeric>
 #include <regex>
 #include "matrix.h"
+#include <map>
 
 #ifndef UTIL_H_
 #define UTIL_H_
@@ -14,6 +15,37 @@
 uint64_t TimeSinceEpochMillisec()
 {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+struct ResultStruct
+{
+    std::string setName = "default set name";
+    std::string algName = "default alg name";
+    int iterationNumber = -1;
+    int result = -1;
+    int optimalResult = -1;
+    int numberOfSteps = -1;
+    int numberOfCheckedResults = -1;
+    double timeOfRunningInMs = -1.0;
+    std::vector<int> resultPermutation{1, 2, 3, 4, 5};
+};
+
+std::ostream &operator<<(std::ostream &out, const ResultStruct &resultStruct)
+{
+    out << "setName: " << resultStruct.setName << std::endl;
+    out << "algName: " << resultStruct.algName << std::endl;
+    out << "iterationNumber: " << resultStruct.iterationNumber << std::endl;
+    out << "result: " << resultStruct.result << std::endl;
+    out << "numberOfSteps: " << resultStruct.numberOfSteps << std::endl;
+    out << "numberOfCheckedResults: " << resultStruct.numberOfCheckedResults << std::endl;
+    out << "timeOfRunningInMs: " << resultStruct.timeOfRunningInMs << std::endl;
+    out << "resultPermutation: ";
+    for (auto i = resultStruct.resultPermutation.begin(); i != resultStruct.resultPermutation.end(); ++i)
+        out << *i << ',';
+
+    out << std::endl;
+
+    return out;
 }
 
 int SumOfarray(int arr[], int size)
@@ -50,8 +82,9 @@ int *RandomPermutation(int const n)
     }
     return arr;
 }
+
 template <typename T, typename... Args>
-void MeasureTimeOfFunctionInMilliSeconds(int testDurationInSecs, std::string funcName, T func, Args &&... args)
+double MeasureTimeOfFunctionInMilliSeconds(int testDurationInSecs, std::string funcName, T func, Args &&... args)
 {
     int counter = 0;
     uint64_t start = TimeSinceEpochMillisec();
@@ -61,12 +94,28 @@ void MeasureTimeOfFunctionInMilliSeconds(int testDurationInSecs, std::string fun
         counter++;
     } while (TimeSinceEpochMillisec() - start < testDurationInSecs * 1000);
 
-    int x = (TimeSinceEpochMillisec() - start);
-    // std::cout << x << std::endl;
-    // std::cout << counter << std::endl;
-    double result = double(x) / double(counter);
+    int timeForAllRuns = (TimeSinceEpochMillisec() - start);
+    double result = double(timeForAllRuns) / double(counter);
 
     std::cout << "Czas dla: " << funcName << "\t" << result << " ms" << std::endl;
+    return result;
+}
+
+/**
+ * Wykonuje funkcje 'n' razy.
+ **/
+template <typename T, typename... Args>
+double MeasureTimeOfFunctionInMilliSecondsV2(int nRuns, std::string funcName, T func, Args &&... args)
+{
+    uint64_t start = TimeSinceEpochMillisec();
+    for (size_t i = 0; i < nRuns; i++)
+        func(std::forward<Args>(args)...); // funkcja do zmierzenia czasu
+
+    int timeForAllRuns = (TimeSinceEpochMillisec() - start);
+    double result = double(timeForAllRuns) / double(nRuns);
+
+    std::cout << "Czas dla: " << funcName << "\t" << result << " ms" << std::endl;
+    return result;
 }
 
 Matrix LoadData(std::string const filepath, int &nOfCitiesOut)
@@ -166,6 +215,35 @@ void LoadOptimalResults(std::string const filepath, Pair<std::string> *optimalre
     }
 }
 
+void LoadOptimalResultsV2(std::string const filepath, std::map<std::string, int> &optimalresultsOut)
+{
+    std::ifstream file(filepath);
+
+    if (file.is_open())
+    {
+        std::string line;
+        int cnt = 0;
+        while (std::getline(file, line))
+        {
+            std::string word;
+            std::istringstream stream;
+            stream.str(line);
+
+            std::string setName;
+            stream >> setName;
+            std::string setOptimalResult;
+            stream >> setOptimalResult;
+
+            optimalresultsOut[setName] = std::stoi(setOptimalResult);
+            // std::cout << pair.first << "\t" << pair.second << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Nie udało się wczytać pliku: " << filepath << std::endl;
+        exit(0);
+    }
+}
 
 /**
  * Zwraca tablice wartości odległości między miastami w permutacji `arr`.
@@ -184,7 +262,12 @@ int *GetArrayOfDistances(int arr[], int size, Matrix &distanceMatrix)
     result[size - 1] = distance;
     return result;
 }
-// TODO zmnienić distanceMatrix na referencje
+
+/**
+ * Na podstawie permutacji rodzica 'parentPermutation', wartości rodzica 'parentValue', 
+ * macierzy odległości 'distanceMatrix' wylicza nową wartość dla permutacji, 
+ * która ma zmienione indeksy względem rodzica zapisane w 'swappedIndex'.
+ */
 int ComputePossibleValue(const int parentPermutation[], const int parentValue, const Matrix &distanceMatrix, const Pair<int> swappedIndexes, const int nOfCities)
 {
     int possibleValue = parentValue;

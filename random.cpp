@@ -34,8 +34,8 @@ int Random(Matrix distanceMatrix, int nOfCities, int timeInS)
             bestDistanceValue = newDistanceValue;
             // *finallPath = *newPath;
         }
-        PrintVector(newPath,nOfCities);
-        std::cout<<std::endl;
+        // PrintVector(newPath,nOfCities);
+        // std::cout<<std::endl;
         // counter+=1;
     }    
     // std::cout<<counter<<std::endl;
@@ -151,27 +151,27 @@ int RandomWalk(Matrix distanceMatrix, int nOfCities, int timeInS){
 }
 
 
-int main(int argc, char **argv)
-{
-    srand(TimeSinceEpochMillisec());
-    std::string filepath = argv[1];
-    std::cout << "PLIK: " << filepath << std::endl;
+// int main(int argc, char **argv)
+// {
+//     srand(TimeSinceEpochMillisec());
+//     std::string filepath = argv[1];
+//     std::cout << "PLIK: " << filepath << std::endl;
 
-    int nOfCities;
-    Matrix distanceMatrix = LoadData(filepath, nOfCities);
+//     int nOfCities;
+//     Matrix distanceMatrix = LoadData(filepath, nOfCities);
 
-    int result = RandomWalk(distanceMatrix, nOfCities,10);
-    std::cout << "RandomWalk: " << result << std::endl;
+//     int result = RandomWalk(distanceMatrix, nOfCities,10);
+//     std::cout << "RandomWalk: " << result << std::endl;
 
 
-    // int firstIndex=0;
-    // int secondIndex=0;
+//     // int firstIndex=0;
+//     // int secondIndex=0;
 
-    // int *arr = new int[1,2,3,4];
-    // PrintVector(arr,4);
-    // Pair swapped = getRandomNeighbour(arr,4);
-    // std::cout<<"FIRS : "<<swapped.first<<" SECOND: "<<swapped.second<<std::endl;
-    // PrintVector(arr,4);
+//     // int *arr = new int[1,2,3,4];
+//     // PrintVector(arr,4);
+//     // Pair swapped = getRandomNeighbour(arr,4);
+//     // std::cout<<"FIRS : "<<swapped.first<<" SECOND: "<<swapped.second<<std::endl;
+//     // PrintVector(arr,4);
 
-    return 0;
-}
+//     return 0;
+// }
