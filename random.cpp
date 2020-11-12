@@ -5,8 +5,6 @@
 #include <stdlib.h>
 
 
-
-
 int Random(Matrix distanceMatrix, int nOfCities, int timeInS)
 {
     // int counter = 1;
