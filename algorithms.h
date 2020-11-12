@@ -99,41 +99,58 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities)
     int icities = 1;
     int distanceValue = 0;
     int currentCity = finallPath[0];
-    int destinationCity = finallPath[1];
-    int currentDistance = distanceMatrix.GetValue(currentCity, destinationCity);
+    int destinationCityIndex = 1;
+    int currentDistance = 0;
     int possibleDistance = 0;
 
     while (icities < nOfCities - 1)
     {
+        // std::cout<<"NEXT"<<std::endl;
+        destinationCityIndex = icities;
+        currentDistance = 999999;
+        // std::cout<<"CURRENT: "<<currentCity <<" DESTINATION :" << finallPath[destinationCityIndex]<<std::endl;
+
         for (int i = icities; i < nOfCities; i++)
         {
             // sprawdzamy odległość do miasta
-            possibleDistance = distanceMatrix.GetValue(currentCity, finallPath[i]);
-            if (currentDistance > possibleDistance)
+            possibleDistance = distanceMatrix.GetValue(currentCity,finallPath[i]);
+            if ((currentDistance > possibleDistance) & (possibleDistance > 0))
             {
                 currentDistance = possibleDistance;
-                destinationCity = i; // GDZIES TUTAJ BŁAD
+                destinationCityIndex = i; 
+
             }
             // std::cout<<"for"<<i<<std::endl;
         }
 
         // std::cout<<"distance: "<<currentDistance<<std::endl;
-        distanceValue = distanceValue + currentDistance;
-        std::swap(finallPath[icities], finallPath[destinationCity]);
+        distanceValue = distanceValue + distanceMatrix.GetValue(currentCity, finallPath[destinationCityIndex]);
+        std::swap(finallPath[icities], finallPath[destinationCityIndex]);
+        currentCity = finallPath[icities];
         icities++;
-        currentCity = destinationCity;
-        destinationCity = finallPath[icities];
-        currentDistance = distanceMatrix.GetValue(currentCity, destinationCity);
-        // std::cout<<"while"<<icities<<std::endl;
+
+                // std::cout<<"while"<<icities<<std::endl;
     }
+    distanceValue = distanceValue + distanceMatrix.GetValue( finallPath[nOfCities-1],finallPath[0]);
 
     // for(int i=1;i<nOfCities;i++){
     //     std::cout<<finallPath[i]<<std::endl;
     //     std::cout<<"DISTANCE "<<distanceMatrix.GetValue(i,i-1)<<std::endl;
 
     // }
-    std::cout << "Finally SimpleHeur result: " << distanceValue << std::endl;
+    // std::cout << "Finally SimpleHeur result: " << distanceValue << std::endl;
+
+    int sum = 0;
+    for(int i =0; i<nOfCities-1;i++){
+        int cost = distanceMatrix.GetValue( finallPath[i+1],finallPath[i]);
+        // std::cout<<"COST: "<<cost<<" nr " <<i<<std::endl;
+        sum = sum+ cost;
+    }
+    // std::cout<<"SUM: "<<sum<<std::endl;
+
     return distanceValue;
+
+
 }
 
 #endif
