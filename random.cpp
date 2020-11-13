@@ -1,7 +1,7 @@
 #include <iostream>
 #include <time.h>       /* time */
 #include "matrix.h"
-#include "util.h"
+#include "util.cpp"
 #include <stdlib.h>
 
 

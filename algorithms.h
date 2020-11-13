@@ -1,6 +1,7 @@
 #include <iostream>
 #include "matrix.h"
-#include "util.h"
+#include "util.cpp"
+#include "algorithms_helpers_funcs.cpp"
 
 #ifndef ALGORITHMS_H_
 #define ALGORITHMS_H_
