@@ -19,7 +19,11 @@ print(getwd())
 results <- read.table("./../results/resultsWithout_kro124p.csv", head=TRUE, sep=",")
 #perm <- select(results, "resultPermutation")[1,1]
 #as.numeric(unlist(strsplit(perm, "\\|")))
+algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalker="RW")
+results <- mutate(results, algName=algs_symbols[algName])
 algs_unique_names <- unique(results[["algName"]])
+results <- as.data.frame(lapply(results, unlist))
+knitr::kable(head(results, 21))
 ```
 
 ## Zadanie 2 - punkt 1 - srednie wyniki
@@ -37,7 +41,7 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=1
   #geom_line(colour="red") +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std), colour="#787671") +
   geom_text(aes(label=sprintf("%0.3f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
-  labs(x="Instancje", y="Jakość", title=uniqueAlgName)
+  labs(x="Instancje", y="Jakość")
 
   
   filename <- paste("../results/zad2_point1_mean_",uniqueAlgName, ".pdf", sep="")
@@ -46,6 +50,28 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=1
 }
 
 ```
+
+
+## Wspólny wykres?
+```{r test}
+gp <- group_by(results, algName, setName)
+gp <- summarize(gp, diff=mean(result-optimalResult), std=sd(result-optimalResult), nOfCities=mean(nOfCities))
+knitr::kable(gp)
+
+plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=1, fill=factor(algName))) +
+  geom_bar(stat="identity", position="dodge2") +
+  #geom_point() +
+  #geom_line() +
+  #geom_errorbar(aes(ymin=diff-std, ymax=diff+std), colour="#787671") +
+  #geom_text(aes(label=sprintf("%0.3f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
+  labs(x="Instancje", y="Jakość", fill="Algorytm")
+  
+  filename <- paste("../results/zad2_point1_all", ".pdf", sep="")
+  ggsave(filename, plot=plot)
+  print(plot)
+```
+
+
 
 ## Zadanie 2 - punkt 1 - min wyniki
 ```{r zad2_point1_min}
@@ -62,7 +88,7 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=1
   #geom_line(colour="red") +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std), colour="#787671") +
   geom_text(aes(label=sprintf("%0.3f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
-  labs(x="Instancje", y="Jakość", title=uniqueAlgName)
+  labs(x="Instancje", y="Jakość")
 
   filename <- paste("../results/zad2_point1_min_",uniqueAlgName, ".pdf", sep="")
   ggsave(filename, plot=plot)
@@ -86,7 +112,7 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=1
   #geom_line(colour="red") +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std), colour="#787671") +
   geom_text(aes(label=sprintf("%0.3f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
-  labs(x="Instancje", y="Jakość", title=uniqueAlgName)
+  labs(x="Instancje", y="Jakość")
 
   filename <- paste("../results/zad2_point1_max_",uniqueAlgName, ".pdf", sep="")
   ggsave(filename, plot=plot)
@@ -110,7 +136,7 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=timeOfRunningInMs, gro
   geom_line(colour="red") +
   geom_errorbar(aes(ymin=timeOfRunningInMs-std, ymax=timeOfRunningInMs+std), colour="#787671") +
   geom_text(aes(label=sprintf("%0.3f", round(timeOfRunningInMs, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
-  labs(x="Instancje", y="Czas działania [ms]", title=uniqueAlgName)
+  labs(x="Instancje", y="Czas działania [ms]")
 
   filename <- paste("../results/zad2_point2_",uniqueAlgName, ".pdf", sep="")
   ggsave(filename, plot=plot)
@@ -134,7 +160,7 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfSteps, gro
   geom_line(colour="red") +
   geom_errorbar(aes(ymin=meanNumberOfSteps-std, ymax=meanNumberOfSteps+std), colour="#787671") +
   geom_text(aes(label=sprintf("%0.3f", round(meanNumberOfSteps, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
-  labs(x="Instancje", y="Średnia liczba kroków", title=uniqueAlgName)
+  labs(x="Instancje", y="Średnia liczba kroków")
 
   filename <- paste("../results/zad2_point4_",uniqueAlgName, ".pdf", sep="")
   ggsave(filename, plot=plot)
@@ -159,7 +185,7 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfCheckedRes
   geom_line(colour="red") +
   geom_errorbar(aes(ymin=meanNumberOfCheckedResults-std, ymax=meanNumberOfCheckedResults+std), colour="#787671") +
   geom_text(aes(label=sprintf("%0.3f", round(meanNumberOfCheckedResults, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
-  labs(x="Instancje", y="Średnia liczba ocenionych rozwiązań", title=uniqueAlgName)
+  labs(x="Instancje", y="Średnia liczba ocenionych rozwiązań")
 
   filename <- paste("../results/zad2_point5_",uniqueAlgName, ".pdf", sep="")
   ggsave(filename, plot=plot)
