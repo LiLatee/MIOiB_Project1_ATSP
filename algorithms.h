@@ -1,11 +1,12 @@
 #include <iostream>
 #include "matrix.h"
-#include "util.h"
+#include "util.cpp"
+#include "algorithms_helpers_funcs.cpp"
 
 #ifndef ALGORITHMS_H_
 #define ALGORITHMS_H_
 
-int Greedy(Matrix distanceMatrix, int nOfCities)
+int Greedy(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 {
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
@@ -13,6 +14,8 @@ int Greedy(Matrix distanceMatrix, int nOfCities)
     int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
     delete[] currentDistancesArray;
     bool done = false;
+    int nOfSteps = 0;
+    int nOfAllCheckedResults = 0;
     // int wholeTime = 0;
     while (!done)
     {
@@ -24,12 +27,14 @@ int Greedy(Matrix distanceMatrix, int nOfCities)
             {
                 // int start = TimeSinceEpochMillisec();
                 int neighbourValue = ComputePossibleValue(currentPermutation, currentPermutationValue, distanceMatrix, Pair<int>(i, j), nOfCities);
+                nOfAllCheckedResults++;
                 // wholeTime += TimeSinceEpochMillisec() - start;
                 if (neighbourValue < currentPermutationValue)
                 {
                     std::swap(currentPermutation[i], currentPermutation[j]);
                     currentPermutationValue = neighbourValue;
                     isBetterResult = true;
+                    nOfSteps++;
                     break;
                 }
                 else if (i == nOfCities - 2 && j == nOfCities - 1)
@@ -42,12 +47,21 @@ int Greedy(Matrix distanceMatrix, int nOfCities)
         }
     }
     // std::cout << "wholeTime: " << wholeTime << std::endl;
+
+    // std::cout << "Finally Greedy result: " << currentPermutationValue << std::endl;
+    if (resultStruct.iterationNumber != -1)
+    {
+        resultStruct.result = currentPermutationValue;
+        resultStruct.numberOfSteps = nOfSteps;
+        resultStruct.numberOfCheckedResults = nOfAllCheckedResults;
+        resultStruct.resultPermutation = std::vector<int>(currentPermutation, currentPermutation + nOfCities);
+    }
+
     delete[] currentPermutation;
-    // std::cout << "Finally Greedy result: " << parentValue << std::endl;
     return currentPermutationValue;
 }
 
-int Steepest(Matrix distanceMatrix, int nOfCities)
+int Steepest(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 {
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
@@ -55,6 +69,8 @@ int Steepest(Matrix distanceMatrix, int nOfCities)
     int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
     delete[] currentDistancesArray;
     bool done = false;
+    int nOfSteps = 0;
+    int nOfAllCheckedResults = 0;
     // int wholeTime = 0;
     while (!done)
     {
@@ -69,6 +85,7 @@ int Steepest(Matrix distanceMatrix, int nOfCities)
                 Pair<int> swappedIndexes = Pair<int>(i, j);
                 // int start = TimeSinceEpochMillisec();
                 int neighbourValue = ComputePossibleValue(currentPermutation, currentPermutationValue, distanceMatrix, swappedIndexes, nOfCities);
+                nOfAllCheckedResults++;
                 // wholeTime += TimeSinceEpochMillisec() - start;
                 if (neighbourValue < currentPermutationValue && neighbourValue < currentBestInNeighbourhoodValue)
                 {
@@ -83,11 +100,19 @@ int Steepest(Matrix distanceMatrix, int nOfCities)
         {
             std::swap(currentPermutation[bestNeighbourSwap.first], currentPermutation[bestNeighbourSwap.second]);
             currentPermutationValue = currentBestInNeighbourhoodValue;
+            nOfSteps++;
         }
         else
             done = true;
     }
     // std::cout << "wholeTime: " << wholeTime << std::endl;
+    if (resultStruct.iterationNumber != -1)
+    {
+        resultStruct.result = currentPermutationValue;
+        resultStruct.numberOfSteps = nOfSteps;
+        resultStruct.numberOfCheckedResults = nOfAllCheckedResults;
+        resultStruct.resultPermutation = std::vector<int>(currentPermutation, currentPermutation + nOfCities);
+    }
     delete[] currentPermutation;
     // std::cout << "Finally Steepest result: " << currentPermutationValue << std::endl;
     return currentPermutationValue;
@@ -113,12 +138,11 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities)
         for (int i = icities; i < nOfCities; i++)
         {
             // sprawdzamy odległość do miasta
-            possibleDistance = distanceMatrix.GetValue(currentCity,finallPath[i]);
+            possibleDistance = distanceMatrix.GetValue(currentCity, finallPath[i]);
             if ((currentDistance > possibleDistance) & (possibleDistance > 0))
             {
                 currentDistance = possibleDistance;
-                destinationCityIndex = i; 
-
+                destinationCityIndex = i;
             }
             // std::cout<<"for"<<i<<std::endl;
         }
@@ -129,9 +153,9 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities)
         currentCity = finallPath[icities];
         icities++;
 
-                // std::cout<<"while"<<icities<<std::endl;
+        // std::cout<<"while"<<icities<<std::endl;
     }
-    distanceValue = distanceValue + distanceMatrix.GetValue( finallPath[nOfCities-1],finallPath[0]);
+    distanceValue = distanceValue + distanceMatrix.GetValue(finallPath[nOfCities - 1], finallPath[0]);
 
     // for(int i=1;i<nOfCities;i++){
     //     std::cout<<finallPath[i]<<std::endl;
@@ -141,16 +165,15 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities)
     // std::cout << "Finally SimpleHeur result: " << distanceValue << std::endl;
 
     int sum = 0;
-    for(int i =0; i<nOfCities-1;i++){
-        int cost = distanceMatrix.GetValue( finallPath[i+1],finallPath[i]);
+    for (int i = 0; i < nOfCities - 1; i++)
+    {
+        int cost = distanceMatrix.GetValue(finallPath[i + 1], finallPath[i]);
         // std::cout<<"COST: "<<cost<<" nr " <<i<<std::endl;
-        sum = sum+ cost;
+        sum = sum + cost;
     }
     // std::cout<<"SUM: "<<sum<<std::endl;
 
     return distanceValue;
-
-
 }
 
 #endif

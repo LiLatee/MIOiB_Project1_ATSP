@@ -1,0 +1,169 @@
+---
+title: "raport_diagrams"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Biblioteki
+```{r libraries}
+library(dplyr)
+library(ggplot2)
+```
+
+## Wczytanie danych
+```{r load_data}
+print(getwd())
+results <- read.table("./../results/resultsWithout_kro124p.csv", head=TRUE, sep=",")
+#perm <- select(results, "resultPermutation")[1,1]
+#as.numeric(unlist(strsplit(perm, "\\|")))
+algs_unique_names <- unique(results[["algName"]])
+```
+
+## Zadanie 2 - punkt 1 - srednie wyniki
+```{r zad2_point1_mean}
+gp <- group_by(results, algName, setName)
+gp <- summarize(gp, diff=mean(result-optimalResult), std=sd(result-optimalResult), nOfCities=mean(nOfCities))
+
+for(uniqueAlgName in algs_unique_names)
+{
+  temp <- filter(gp, algName==uniqueAlgName)
+
+plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=1)) +
+  geom_bar(stat="identity", position="identity") +
+  #geom_point(colour="red") +
+  #geom_line(colour="red") +
+  geom_errorbar(aes(ymin=diff-std, ymax=diff+std), colour="#787671") +
+  geom_text(aes(label=sprintf("%0.3f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
+  labs(x="Instancje", y="Jakość", title=uniqueAlgName)
+
+  
+  filename <- paste("../results/zad2_point1_mean_",uniqueAlgName, ".pdf", sep="")
+  ggsave(filename, plot=plot)
+  print(plot)
+}
+
+```
+
+## Zadanie 2 - punkt 1 - min wyniki
+```{r zad2_point1_min}
+gp <- group_by(results, algName, setName)
+gp <- summarize(gp, diff=min(result-optimalResult), std=sd(result-optimalResult), nOfCities=mean(nOfCities))
+
+for(uniqueAlgName in algs_unique_names)
+{
+  temp <- filter(gp, algName==uniqueAlgName)
+
+plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=1)) +
+  geom_bar(stat="identity", position="identity") +
+  #geom_point(colour="red") +
+  #geom_line(colour="red") +
+  geom_errorbar(aes(ymin=diff-std, ymax=diff+std), colour="#787671") +
+  geom_text(aes(label=sprintf("%0.3f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
+  labs(x="Instancje", y="Jakość", title=uniqueAlgName)
+
+  filename <- paste("../results/zad2_point1_min_",uniqueAlgName, ".pdf", sep="")
+  ggsave(filename, plot=plot)
+  print(plot)
+}
+
+```
+
+## Zadanie 2 - punkt 1 - max wyniki
+```{r zad2_point1_max}
+gp <- group_by(results, algName, setName)
+gp <- summarize(gp, diff=max(result-optimalResult), std=sd(result-optimalResult), nOfCities=mean(nOfCities))
+
+for(uniqueAlgName in algs_unique_names)
+{
+  temp <- filter(gp, algName==uniqueAlgName)
+
+plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=1)) +
+  geom_bar(stat="identity", position="identity") +
+  #geom_point(colour="red") +
+  #geom_line(colour="red") +
+  geom_errorbar(aes(ymin=diff-std, ymax=diff+std), colour="#787671") +
+  geom_text(aes(label=sprintf("%0.3f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
+  labs(x="Instancje", y="Jakość", title=uniqueAlgName)
+
+  filename <- paste("../results/zad2_point1_max_",uniqueAlgName, ".pdf", sep="")
+  ggsave(filename, plot=plot)
+  print(plot)
+}
+
+```
+
+## Zadanie 2 - punkt 2
+```{r zad2_point2}
+gp <- group_by(results, algName, setName)
+gp <- summarize(gp, timeOfRunningInMs=mean(timeOfRunningInMs), std=sd(timeOfRunningInMs), nOfCities=mean(nOfCities))
+
+for(uniqueAlgName in algs_unique_names)
+{
+  temp <- filter(gp, algName==uniqueAlgName)
+
+plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=timeOfRunningInMs, group=1)) +
+  geom_bar(stat="identity", position="identity") +
+  geom_point(colour="red") +
+  geom_line(colour="red") +
+  geom_errorbar(aes(ymin=timeOfRunningInMs-std, ymax=timeOfRunningInMs+std), colour="#787671") +
+  geom_text(aes(label=sprintf("%0.3f", round(timeOfRunningInMs, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
+  labs(x="Instancje", y="Czas działania [ms]", title=uniqueAlgName)
+
+  filename <- paste("../results/zad2_point2_",uniqueAlgName, ".pdf", sep="")
+  ggsave(filename, plot=plot)
+  print(plot)
+}
+
+```
+
+## Zadanie 2 - punkt 4
+```{r zad2_point4}
+gp <- group_by(results, algName, setName)
+gp <- summarize(gp, meanNumberOfSteps=mean(numberOfSteps), std=sd(numberOfSteps), nOfCities=mean(nOfCities))
+
+for(uniqueAlgName in algs_unique_names)
+{
+  temp <- filter(gp, algName==uniqueAlgName)
+
+plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfSteps, group=1)) +
+  geom_bar(stat="identity", position="identity") +
+  geom_point(colour="red") +
+  geom_line(colour="red") +
+  geom_errorbar(aes(ymin=meanNumberOfSteps-std, ymax=meanNumberOfSteps+std), colour="#787671") +
+  geom_text(aes(label=sprintf("%0.3f", round(meanNumberOfSteps, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
+  labs(x="Instancje", y="Średnia liczba kroków", title=uniqueAlgName)
+
+  filename <- paste("../results/zad2_point4_",uniqueAlgName, ".pdf", sep="")
+  ggsave(filename, plot=plot)
+  print(plot)
+}
+
+```
+
+
+## Zadanie 2 - punkt 5
+```{r zad2_point5}
+gp <- group_by(results, algName, setName)
+gp <- summarize(gp, meanNumberOfCheckedResults=mean(numberOfCheckedResults), std=sd(numberOfCheckedResults), nOfCities=mean(nOfCities))
+
+for(uniqueAlgName in algs_unique_names)
+{
+  temp <- filter(gp, algName==uniqueAlgName)
+
+plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfCheckedResults, group=1)) +
+  geom_bar(stat="identity", position="identity") +
+  geom_point(colour="red") +
+  geom_line(colour="red") +
+  geom_errorbar(aes(ymin=meanNumberOfCheckedResults-std, ymax=meanNumberOfCheckedResults+std), colour="#787671") +
+  geom_text(aes(label=sprintf("%0.3f", round(meanNumberOfCheckedResults, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
+  labs(x="Instancje", y="Średnia liczba ocenionych rozwiązań", title=uniqueAlgName)
+
+  filename <- paste("../results/zad2_point5_",uniqueAlgName, ".pdf", sep="")
+  ggsave(filename, plot=plot)
+  print(plot)
+}
+
+```
