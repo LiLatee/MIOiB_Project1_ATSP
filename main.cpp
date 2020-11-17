@@ -70,8 +70,40 @@ int main(int argc, char **argv)
     string setsPath, resultsFilePath, optimalResultsPath;
     int nOfIterations;
     LoadParameters(argc, argv, setsPath, resultsFilePath, nOfIterations, optimalResultsPath);
-    
+
     std::cout << "Sets path: " << setsPath << std::endl;
     std::cout << "Results path: " << resultsFilePath << std::endl;
     RunTests(setsPath, resultsFilePath, nOfIterations, optimalResultsPath);
+
+
+    //// testowanie ComputePossibleValue
+    // int parentPermutation[] = {0,1,2,3,4};
+    // int nOfCities = 5;
+    // Matrix distanceMatrix = Matrix(5, 5);
+    // for (int i = 0; i < 5; i++)
+    //     for (int j = 0; j < 5; j++)
+    //         distanceMatrix.SetValue(i, j, i * 5 + j);
+
+    // std::cout << distanceMatrix;
+
+    // int *currentDistancesArray = GetArrayOfDistances(parentPermutation, nOfCities, distanceMatrix);
+    // int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
+    // int parentValue = SumOfarray(currentDistancesArray, nOfCities);
+    // std::cout << "====================================PRZED====================================\n"; 
+    // PrintVector(parentPermutation, nOfCities);
+    // PrintVector(currentDistancesArray, nOfCities);
+    // std::cout << "parentValue: " << parentValue << std::endl;
+    
+    // int p1 = std::stoi(argv[1]);
+    // int p2 = std::stoi(argv[2]);
+    // Pair<int> swappedIndexes = Pair(p1, p2);
+    // int newValue = ComputePossibleValue(parentPermutation, parentValue, distanceMatrix, swappedIndexes, nOfCities);
+    // int newPermutation[nOfCities];
+    // std::copy(parentPermutation, parentPermutation+nOfCities, newPermutation);
+    // std::swap(newPermutation[p1], newPermutation[p2]);
+    // int *newDistancesArray = GetArrayOfDistances(newPermutation, nOfCities, distanceMatrix);
+    // std::cout << "====================================PO====================================\n";   
+    // PrintVector(newPermutation, nOfCities);
+    // PrintVector(newDistancesArray, nOfCities);
+    // std::cout << "newValue: " << newValue << std::endl;
 }

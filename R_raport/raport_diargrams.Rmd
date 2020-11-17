@@ -29,7 +29,7 @@ knitr::kable(head(results, 21))
 ## Zadanie 2 - punkt 1 - srednie wyniki - WSPOLNY WYKRES
 ```{r test}
 gp <- group_by(results, algName, setName)
-gp <- summarize(gp, diff=mean((result-optimalResult)/optimalResult), std=sd((result-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
+gp <- summarize(gp, diff=mean((finalResult-optimalResult)/optimalResult), std=sd((finalResult-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
 knitr::kable(gp)
 
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, fill=factor(algName))) +
@@ -41,14 +41,15 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=alg
   labs(x="Instancje", y="Jakość", fill="Algorytm")
   
   filename <- paste("../results/zad2_point1_all", ".pdf", sep="")
-  ggsave(filename, plot=plot)
+  #ggsave(filename, plot=plot)
   print(plot)
+  cairo_pdf(filename, family="DejaVu Sans") # polskie znaki zapisuje poprawnie
 ```
 
 ## Zadanie 2 - punkt 1 - srednie wyniki - WSPOLNY WYKRES PUNKTOWY
 ```{r zad2_point1_mean_all}
 gp <- group_by(results, algName, setName)
-gp <- summarize(gp, diff=mean((result-optimalResult)/optimalResult), std=sd((result-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
+gp <- summarize(gp, diff=mean((finalResult-optimalResult)/optimalResult), std=sd((finalResult-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
 knitr::kable(head(gp))
 
 pd <- position_dodge(0.3)
@@ -61,14 +62,15 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=alg
   scale_color_discrete(name="Algorytm")
   
   filename <- paste("../results/zad2_point1_mean_all", ".pdf", sep="")
-  ggsave(filename, plot=plot)
+  #ggsave(filename, plot=plot)
   print(plot)
+  cairo_pdf(filename, family="DejaVu Sans") # polskie znaki zapisuje poprawnie
 ```
 
 ## Zadanie 2 - punkt 1 - min wyniki
 ```{r zad2_point1_min_all}
 gp <- group_by(results, algName, setName)
-gp <- summarize(gp, diff=min((result-optimalResult)/optimalResult), std=sd((result-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
+gp <- summarize(gp, diff=min((finalResult-optimalResult)/optimalResult), std=sd((finalResult-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
 
 pd <- position_dodge(0.3)
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, colour=algName)) +
@@ -76,19 +78,20 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=alg
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std, width=0.15), position=pd) +
   geom_text(aes(label=sprintf("%0.1f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
-  labs(x="Instancje", y="Minimalna jakość") +
+  labs(x="Instancje", y="Minimalna jakość - mniej = lepiej") +
   scale_color_discrete(name="Algorytm")
 
   filename <- paste("../results/zad2_point1_min_all", ".pdf", sep="")
-  ggsave(filename, plot=plot)
+  #ggsave(filename, plot=plot)
   print(plot)
+  cairo_pdf(filename, family="DejaVu Sans") # polskie znaki zapisuje poprawnie
 
 ```
 
 ## Zadanie 2 - punkt 1 - max wyniki
 ```{r zad2_point1_max_all}
 gp <- group_by(results, algName, setName)
-gp <- summarize(gp, diff=max((result-optimalResult)/optimalResult), std=sd((result-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
+gp <- summarize(gp, diff=max((finalResult-optimalResult)/optimalResult), std=sd((finalResult-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
 
 pd <- position_dodge(0.3)
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, colour=algName)) +
@@ -96,12 +99,13 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=alg
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std, width=0.15), position=pd) +
   geom_text(aes(label=sprintf("%0.1f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
-  labs(x="Instancje", y="Maksymalna jakość") +
+  labs(x="Instancje", y="Maksymalna jakość - mniej = lepiej") +
   scale_color_discrete(name="Algorytm")
 
   filename <- paste("../results/zad2_point1_max_all", ".pdf", sep="")
-  ggsave(filename, plot=plot)
+  #ggsave(filename, plot=plot)
   print(plot)
+  cairo_pdf(filename, family="DejaVu Sans") # polskie znaki zapisuje poprawnie
 
 ```
 
@@ -120,8 +124,38 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=timeOfRunningInMs, group
   scale_color_discrete(name="Algorytm")
 
   filename <- paste("../results/zad2_point2_all", ".pdf", sep="")
-  ggsave(filename, plot=plot)
+  #ggsave(filename, plot=plot)
   print(plot)
+  cairo_pdf(filename, family="DejaVu Sans") # polskie znaki zapisuje poprawnie
+
+```
+
+
+## Zadanie 2 - punkt 3
+```{r zad2_point3_all}
+# gp <- filter(results, iterationNumber==0 | iterationNumber==9)
+# gp <- select(results, algName, setName, initialValue, finalValue)
+# gp <- group_by(results, algName, setName)
+# gp <- summarize(gp, initialValue=max(result), finalValue=min(result), nOfCities=mean(nOfCities))
+# knitr::kable(gp)
+# 
+# plot <- ggplot(gp, aes(x=initialValue, y=finalValue, group=algName)) +
+#   facet_wrap(~setName) +
+#   geom_point()
+# print(plot)
+
+# pd <- position_dodge(0.3)
+# plot <- ggplot(gp, aes(x=iterationNumber, y=timeOfRunningInMs, group=algName, colour=algName)) +
+#   #geom_line(aes(linetype=algName)) +
+#   geom_point(size=3, shape=21, fill="white", pd=position_dodge(0.1), position=pd) +
+#   geom_text(aes(label=sprintf("%0.1f", round(timeOfRunningInMs, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+#   labs(x="Instancje", y="Czas działania [ms]") +
+#   scale_color_discrete(name="Algorytm")
+# 
+#   filename <- paste("../results/zad2_point2_all", ".pdf", sep="")
+#   #ggsave(filename, plot=plot)
+#   print(plot)
+#   cairo_pdf(filename, family="DejaVu Sans") # polskie znaki zapisuje poprawnie
 
 ```
 
@@ -140,8 +174,9 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=meanNumberOfSteps, group
   scale_color_discrete(name="Algorytm")
   
   filename <- paste("../results/zad2_point4_all", ".pdf", sep="")
-  ggsave(filename, plot=plot)
+  #ggsave(filename, plot=plot)
   print(plot)
+  cairo_pdf(filename, family="DejaVu Sans") # polskie znaki zapisuje poprawnie
 
 ```
 
@@ -162,8 +197,7 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=meanNumberOfCheckedResul
 
 
   filename <- paste("../results/zad2_point5_all", ".pdf", sep="")
-  ggsave(filename, plot=plot)
+  #ggsave(filename, plot=plot)
   print(plot)
-
-
+  cairo_pdf(filename, family="DejaVu Sans") # polskie znaki zapisuje poprawnie
 ```

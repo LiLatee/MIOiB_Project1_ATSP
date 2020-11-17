@@ -12,6 +12,7 @@ int Greedy(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     int *currentPermutation = RandomPermutation(nOfCities);
     int *currentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, distanceMatrix);
     int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
+    resultStruct.initialResult = currentPermutationValue;
     delete[] currentDistancesArray;
     bool done = false;
     int nOfSteps = 0;
@@ -51,7 +52,7 @@ int Greedy(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     // std::cout << "Finally Greedy result: " << currentPermutationValue << std::endl;
     if (resultStruct.iterationNumber != -1)
     {
-        resultStruct.result = currentPermutationValue;
+        resultStruct.finalResult = currentPermutationValue;
         resultStruct.numberOfSteps = nOfSteps;
         resultStruct.numberOfCheckedResults = nOfAllCheckedResults;
         resultStruct.resultPermutation = std::vector<int>(currentPermutation, currentPermutation + nOfCities);
@@ -67,6 +68,7 @@ int Steepest(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     int *currentPermutation = RandomPermutation(nOfCities);
     int *currentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, distanceMatrix);
     int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
+    resultStruct.initialResult = currentPermutationValue;
     delete[] currentDistancesArray;
     bool done = false;
     int nOfSteps = 0;
@@ -108,7 +110,7 @@ int Steepest(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     // std::cout << "wholeTime: " << wholeTime << std::endl;
     if (resultStruct.iterationNumber != -1)
     {
-        resultStruct.result = currentPermutationValue;
+        resultStruct.finalResult = currentPermutationValue;
         resultStruct.numberOfSteps = nOfSteps;
         resultStruct.numberOfCheckedResults = nOfAllCheckedResults;
         resultStruct.resultPermutation = std::vector<int>(currentPermutation, currentPermutation + nOfCities);

@@ -23,7 +23,8 @@ struct ResultStruct
     std::string algName = "default alg name";
     int nOfCities = -1;
     int iterationNumber = -1;
-    int result = -1;
+    int initialResult = -1;
+    int finalResult = -1;
     int optimalResult = -1;
     int numberOfSteps = -1;
     int numberOfCheckedResults = -1;
@@ -37,7 +38,8 @@ std::ostream &operator<<(std::ostream &out, const ResultStruct &resultStruct)
     out << "algName: " << resultStruct.algName << std::endl;
     out << "nOfCities: " << resultStruct.nOfCities << std::endl;
     out << "iterationNumber: " << resultStruct.iterationNumber << std::endl;
-    out << "result: " << resultStruct.result << std::endl;
+    out << "initialResult: " << resultStruct.initialResult << std::endl;
+    out << "finalResult: " << resultStruct.finalResult << std::endl;
     out << "numberOfSteps: " << resultStruct.numberOfSteps << std::endl;
     out << "numberOfCheckedResults: " << resultStruct.numberOfCheckedResults << std::endl;
     out << "timeOfRunningInMs: " << resultStruct.timeOfRunningInMs << std::endl;
@@ -171,7 +173,8 @@ void SaveResultsToCSV(std::vector<ResultStruct> results, fs::path resultsFilePat
             file << "algName,";
             file << "nOfCities,";
             file << "iterationNumber,";
-            file << "result,";
+            file << "initialResult,";
+            file << "finalResult,";
             file << "optimalResult,";
             file << "numberOfSteps,";
             file << "numberOfCheckedResults,";
@@ -186,7 +189,8 @@ void SaveResultsToCSV(std::vector<ResultStruct> results, fs::path resultsFilePat
             file << it->algName << ",";
             file << it->nOfCities << ",";
             file << it->iterationNumber << ",";
-            file << it->result << ",";
+            file << it->initialResult << ",";
+            file << it->finalResult << ",";
             file << it->optimalResult << ",";
             file << it->numberOfSteps << ",";
             file << it->numberOfCheckedResults << ",";
