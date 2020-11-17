@@ -16,7 +16,7 @@ library(ggplot2)
 ## Wczytanie danych
 ```{r load_data}
 print(getwd())
-results <- read.table("./../results/resultsWithout_kro124p.csv", head=TRUE, sep=",")
+results <- read.table("./../results/results.csv", head=TRUE, sep=",")
 #perm <- select(results, "resultPermutation")[1,1]
 #as.numeric(unlist(strsplit(perm, "\\|")))
 algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalker="RW")
@@ -29,15 +29,15 @@ knitr::kable(head(results, 21))
 ## Zadanie 2 - punkt 1 - srednie wyniki - WSPOLNY WYKRES
 ```{r test}
 gp <- group_by(results, algName, setName)
-gp <- summarize(gp, diff=mean(result-optimalResult), std=sd(result-optimalResult), nOfCities=mean(nOfCities))
+gp <- summarize(gp, diff=mean((result-optimalResult)/optimalResult), std=sd((result-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
 knitr::kable(gp)
 
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, fill=factor(algName))) +
   geom_bar(stat="identity", position="dodge2") +
   #geom_point() +
   #geom_line() +
-  geom_errorbar(aes(ymin=diff-std, ymax=diff+std), position = position_dodge(1), width=0.3) +
-  #geom_text(aes(label=sprintf("%0.3f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
+  geom_errorbar(aes(ymin=diff-std, ymax=diff+std), position = position_dodge(1), width=0.1) +
+  #geom_text(aes(label=sprintf("%0.1f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
   labs(x="Instancje", y="Jakość", fill="Algorytm")
   
   filename <- paste("../results/zad2_point1_all", ".pdf", sep="")
@@ -48,15 +48,16 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=alg
 ## Zadanie 2 - punkt 1 - srednie wyniki - WSPOLNY WYKRES PUNKTOWY
 ```{r zad2_point1_mean_all}
 gp <- group_by(results, algName, setName)
-gp <- summarize(gp, diff=mean(result-optimalResult), std=sd(result-optimalResult), nOfCities=mean(nOfCities))
+gp <- summarize(gp, diff=mean((result-optimalResult)/optimalResult), std=sd((result-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
+knitr::kable(head(gp))
 
 pd <- position_dodge(0.3)
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, colour=algName)) +
   #geom_line(aes(linetype=algName)) +
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std, width=0.15), position=pd) +
-  geom_text(aes(label=sprintf("%0.0f", round(diff, digits=1))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
-  labs(x="Instancje", y="Średnia jakość") +
+  geom_text(aes(label=sprintf("%0.2f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+  labs(x="Instancje", y="Średnia jakość - mniej = lepiej") +
   scale_color_discrete(name="Algorytm")
   
   filename <- paste("../results/zad2_point1_mean_all", ".pdf", sep="")
@@ -67,14 +68,14 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=alg
 ## Zadanie 2 - punkt 1 - min wyniki
 ```{r zad2_point1_min_all}
 gp <- group_by(results, algName, setName)
-gp <- summarize(gp, diff=min(result-optimalResult), std=sd(result-optimalResult), nOfCities=mean(nOfCities))
+gp <- summarize(gp, diff=min((result-optimalResult)/optimalResult), std=sd((result-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
 
 pd <- position_dodge(0.3)
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, colour=algName)) +
   #geom_line(aes(linetype=algName)) +
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std, width=0.15), position=pd) +
-  geom_text(aes(label=sprintf("%0.0f", round(diff, digits=1))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+  geom_text(aes(label=sprintf("%0.1f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
   labs(x="Instancje", y="Minimalna jakość") +
   scale_color_discrete(name="Algorytm")
 
@@ -87,14 +88,14 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=alg
 ## Zadanie 2 - punkt 1 - max wyniki
 ```{r zad2_point1_max_all}
 gp <- group_by(results, algName, setName)
-gp <- summarize(gp, diff=max(result-optimalResult), std=sd(result-optimalResult), nOfCities=mean(nOfCities))
+gp <- summarize(gp, diff=max((result-optimalResult)/optimalResult), std=sd((result-optimalResult)/optimalResult), nOfCities=mean(nOfCities))
 
 pd <- position_dodge(0.3)
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, colour=algName)) +
   #geom_line(aes(linetype=algName)) +
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std, width=0.15), position=pd) +
-  geom_text(aes(label=sprintf("%0.0f", round(diff, digits=1))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+  geom_text(aes(label=sprintf("%0.1f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
   labs(x="Instancje", y="Maksymalna jakość") +
   scale_color_discrete(name="Algorytm")
 
@@ -114,7 +115,7 @@ pd <- position_dodge(0.3)
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=timeOfRunningInMs, group=algName, colour=algName)) +
   #geom_line(aes(linetype=algName)) +
   geom_point(size=3, shape=21, fill="white", pd=position_dodge(0.1), position=pd) +
-  geom_text(aes(label=sprintf("%0.0f", round(timeOfRunningInMs, digits=1))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+  geom_text(aes(label=sprintf("%0.1f", round(timeOfRunningInMs, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
   labs(x="Instancje", y="Czas działania [ms]") +
   scale_color_discrete(name="Algorytm")
 
@@ -134,7 +135,7 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=meanNumberOfSteps, group
   #geom_line(aes(linetype=algName)) +
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=meanNumberOfSteps-std, ymax=meanNumberOfSteps+std, width=0.15), position=pd) +
-  geom_text(aes(label=sprintf("%0.0f", round(meanNumberOfSteps, digits=1))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+  geom_text(aes(label=sprintf("%0.1f", round(meanNumberOfSteps, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
   labs(x="Instancje", y="Średnia liczba kroków") +
   scale_color_discrete(name="Algorytm")
   
@@ -155,7 +156,7 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=meanNumberOfCheckedResul
   #geom_line(aes(linetype=algName)) +
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=meanNumberOfCheckedResults-std, ymax=meanNumberOfCheckedResults+std, width=0.15), position=pd) +
-  geom_text(aes(label=sprintf("%0.0f", round(meanNumberOfCheckedResults, digits=1))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+  geom_text(aes(label=sprintf("%0.1f", round(meanNumberOfCheckedResults, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
   labs(x="Instancje", y="Średnia liczba ocenionych rozwiązań") +
   scale_color_discrete(name="Algorytm")
 
