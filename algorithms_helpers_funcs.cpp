@@ -5,6 +5,13 @@
 #include "matrix.h"
 #include "util.cpp"
 
+unsigned modulo( int value, unsigned m) {
+    int mod = value % (int)m;
+    if (mod < 0) {
+        mod += m;
+    }
+    return mod;
+}
 
 
 int *RandomPermutation(int const n)
@@ -167,6 +174,70 @@ int ComputePossibleValue(const int parentPermutation[], const int parentValue, c
 
         return possibleValue;
     }
+
 }
+
+Pair<int> getRandomNeighbour(int *arr, int nOfCities){
+    
+    int randomIndexFirst = rand() % nOfCities;
+    int randomIndexSecond= 0;
+    do{
+    randomIndexSecond = rand() % nOfCities;
+
+    }while(randomIndexSecond==randomIndexFirst);
+
+    Pair swappedIndexes = Pair(1,2);
+    if (randomIndexFirst>randomIndexSecond){
+        swappedIndexes = Pair(randomIndexSecond,randomIndexFirst);
+    }else{
+        swappedIndexes = Pair(randomIndexFirst,randomIndexSecond);
+    }
+    return swappedIndexes;   
+}
+
+int getCostDiffForNeighbour(int *arr,Matrix distanceMatrix, Pair<int> swappedIndexes, int nOfCities){
+    //first index new value
+    // [i-1][i] oraz [i][i+1]
+    int currentCost = 0 ;
+    int oldCost = 0;
+   
+    int diff = swappedIndexes.second - swappedIndexes.first;
+
+    if ( diff > 1 && diff != nOfCities -1){
+        currentCost =currentCost+ distanceMatrix.GetValue( arr[modulo((swappedIndexes.first-1),nOfCities)],arr[swappedIndexes.first])
+                + distanceMatrix.GetValue( arr[swappedIndexes.first],arr[modulo((swappedIndexes.first+1),nOfCities)]);
+        currentCost =currentCost+ distanceMatrix.GetValue( arr[modulo((swappedIndexes.second-1),nOfCities)],arr[swappedIndexes.second])
+                    + distanceMatrix.GetValue( arr[swappedIndexes.second],arr[modulo((swappedIndexes.second+1),nOfCities)]);     
+
+    std::swap(arr[swappedIndexes.first], arr[swappedIndexes.second]);
+
+        oldCost = oldCost+ distanceMatrix.GetValue( arr[modulo((swappedIndexes.first-1),nOfCities)],arr[swappedIndexes.first])
+                + distanceMatrix.GetValue( arr[swappedIndexes.first],arr[modulo((swappedIndexes.first+1),nOfCities)]);
+        oldCost = oldCost+ distanceMatrix.GetValue( arr[modulo((swappedIndexes.second-1),nOfCities)],arr[swappedIndexes.second])
+                    + distanceMatrix.GetValue( arr[swappedIndexes.second],arr[modulo((swappedIndexes.second+1),nOfCities)]);     
+    }else if(diff == 1){
+        currentCost =currentCost+ distanceMatrix.GetValue( arr[modulo((swappedIndexes.first-1),nOfCities)],arr[swappedIndexes.first])
+                + distanceMatrix.GetValue( arr[swappedIndexes.first],arr[modulo((swappedIndexes.first+1),nOfCities)]);
+        currentCost =currentCost + distanceMatrix.GetValue( arr[swappedIndexes.second],arr[modulo((swappedIndexes.second+1),nOfCities)]);   
+
+    std::swap(arr[swappedIndexes.first], arr[swappedIndexes.second]);
+
+        oldCost = oldCost+ distanceMatrix.GetValue( arr[modulo((swappedIndexes.first-1),nOfCities)],arr[swappedIndexes.first])
+                + distanceMatrix.GetValue( arr[swappedIndexes.first],arr[modulo((swappedIndexes.first+1),nOfCities)]);
+        oldCost = oldCost + distanceMatrix.GetValue( arr[swappedIndexes.second],arr[modulo((swappedIndexes.second+1),nOfCities)]);     
+
+    }else if (diff == nOfCities-1){
+        currentCost =currentCost+ distanceMatrix.GetValue( arr[swappedIndexes.first],arr[modulo((swappedIndexes.first+1),nOfCities)]);
+        currentCost =currentCost+ distanceMatrix.GetValue( arr[modulo((swappedIndexes.second-1),nOfCities)],arr[swappedIndexes.second])
+                    + distanceMatrix.GetValue( arr[swappedIndexes.second],arr[modulo((swappedIndexes.second+1),nOfCities)]);     
+    std::swap(arr[swappedIndexes.first], arr[swappedIndexes.second]);
+
+        oldCost = oldCost+ distanceMatrix.GetValue( arr[swappedIndexes.first],arr[modulo((swappedIndexes.first+1),nOfCities)]);
+        oldCost = oldCost+ distanceMatrix.GetValue( arr[modulo((swappedIndexes.second-1),nOfCities)],arr[swappedIndexes.second])
+                    + distanceMatrix.GetValue( arr[swappedIndexes.second],arr[modulo((swappedIndexes.second+1),nOfCities)]); 
+    }
+
+    return currentCost-oldCost; 
+} 
 
 #endif
