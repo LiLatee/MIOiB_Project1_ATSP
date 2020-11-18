@@ -12,6 +12,8 @@ int Greedy(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     int *currentPermutation = RandomPermutation(nOfCities);
     int *currentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, distanceMatrix);
     int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
+    if (resultStruct.iterationNumber != -1)
+        resultStruct.initialResult = currentPermutationValue;
     delete[] currentDistancesArray;
     bool done = false;
     int nOfSteps = 0;
@@ -51,7 +53,7 @@ int Greedy(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     // std::cout << "Finally Greedy result: " << currentPermutationValue << std::endl;
     if (resultStruct.iterationNumber != -1)
     {
-        resultStruct.result = currentPermutationValue;
+        resultStruct.finalResult = currentPermutationValue;
         resultStruct.numberOfSteps = nOfSteps;
         resultStruct.numberOfCheckedResults = nOfAllCheckedResults;
         resultStruct.resultPermutation = std::vector<int>(currentPermutation, currentPermutation + nOfCities);
@@ -67,6 +69,8 @@ int Steepest(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     int *currentPermutation = RandomPermutation(nOfCities);
     int *currentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, distanceMatrix);
     int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
+    if (resultStruct.iterationNumber != -1)
+        resultStruct.initialResult = currentPermutationValue;
     delete[] currentDistancesArray;
     bool done = false;
     int nOfSteps = 0;
@@ -108,7 +112,7 @@ int Steepest(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     // std::cout << "wholeTime: " << wholeTime << std::endl;
     if (resultStruct.iterationNumber != -1)
     {
-        resultStruct.result = currentPermutationValue;
+        resultStruct.finalResult = currentPermutationValue;
         resultStruct.numberOfSteps = nOfSteps;
         resultStruct.numberOfCheckedResults = nOfAllCheckedResults;
         resultStruct.resultPermutation = std::vector<int>(currentPermutation, currentPermutation + nOfCities);
@@ -127,12 +131,12 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     int destinationCityIndex = 1;
     int currentDistance = 0;
     int possibleDistance = 0;
-    int nOfSteps = 0 ;
+    int nOfSteps = 0;
 
     while (icities < nOfCities - 1)
     {
         destinationCityIndex = icities;
-        currentDistance = 999999;
+        currentDistance = INT32_MAX;
 
         for (int i = icities; i < nOfCities; i++)
         {
@@ -149,10 +153,8 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
         std::swap(finallPath[icities], finallPath[destinationCityIndex]);
         currentCity = finallPath[icities];
         icities++;
-
     }
     distanceValue = distanceValue + distanceMatrix.GetValue(finallPath[nOfCities - 1], finallPath[0]);
-
 
     int sum = 0;
     for (int i = 0; i < nOfCities - 1; i++)
@@ -163,7 +165,7 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 
     if (resultStruct.iterationNumber != -1)
     {
-        resultStruct.result = distanceValue;
+        resultStruct.finalResult = distanceValue;
         resultStruct.numberOfSteps = nOfSteps;
         resultStruct.numberOfCheckedResults = nOfSteps;
         resultStruct.resultPermutation = std::vector<int>(finallPath, finallPath + nOfCities);
@@ -172,82 +174,55 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     return distanceValue;
 }
 
-int Random(Matrix distanceMatrix, int nOfCities, int timeInS, ResultStruct &resultStruct)
+int Random(Matrix distanceMatrix, int nOfCities, double timeInMillisec, ResultStruct &resultStruct)
 {
-    time_t current_time = time(NULL);
-
+    double current_time = TimeSinceEpochMillisec();
+    std::cout.precision(17);
+    // std::cout << "current_time: " << current_time << std::endl;
+    // std::cout << "CZAS: " << timeInS << std::endl;
+    // std::cout << "CZAS: " << timeInS+current_time << std::endl;
+    // exit(0);
     int bestDistanceValue = 0;
     int *finallPath = RandomPermutation(nOfCities);
     std::vector<int> bestPath;
     int nOfSteps = 0;
-    for(int i =0; i<nOfCities-1;i++){
-        int cost = distanceMatrix.GetValue( finallPath[i],finallPath[i+1]);
+    for (int i = 0; i < nOfCities - 1; i++)
+    {
+        int cost = distanceMatrix.GetValue(finallPath[i], finallPath[i + 1]);
         bestDistanceValue = bestDistanceValue + cost;
     }
-    bestDistanceValue= bestDistanceValue+ distanceMatrix.GetValue( finallPath[nOfCities- 1],finallPath[0]);
+    bestDistanceValue = bestDistanceValue + distanceMatrix.GetValue(finallPath[nOfCities - 1], finallPath[0]);
+    if (resultStruct.iterationNumber != -1)
+        resultStruct.initialResult = bestDistanceValue;
+    while (TimeSinceEpochMillisec() < current_time + timeInMillisec)
+    {   
 
-    while(time(NULL) < current_time+ timeInS){
         int *newPath = RandomPermutation(nOfCities);
-        int newDistanceValue =  0;
+        int newDistanceValue = 0;
 
-        for(int i =0; i<nOfCities-1;i++){
-            int cost = distanceMatrix.GetValue( newPath[i],newPath[i+1]);
+        for (int i = 0; i < nOfCities - 1; i++)
+        {
+            int cost = distanceMatrix.GetValue(newPath[i], newPath[i + 1]);
             newDistanceValue = newDistanceValue + cost;
         }
-        newDistanceValue = newDistanceValue + distanceMatrix.GetValue( newPath[nOfCities- 1],newPath[0]);
+        newDistanceValue = newDistanceValue + distanceMatrix.GetValue(newPath[nOfCities - 1], newPath[0]);
 
-        if(newDistanceValue < bestDistanceValue){
+        if (newDistanceValue < bestDistanceValue)
+        {
             bestDistanceValue = newDistanceValue;
             bestPath = std::vector<int>(newPath, newPath + nOfCities);
         }
-        delete[] newPath;  
+        delete[] newPath;
         nOfSteps++;
+        // std::cout << "time(NULL): " << time(NULL) << std::endl;
+        // std::cout << "current_time: " << current_time << std::endl;
+        // std::cout << "current_time + timeInS: " << timeInS+current_time << std::endl;
+        // std::cout << "roznica: " << time(NULL)-current_time << std::endl;
     }
 
     if (resultStruct.iterationNumber != -1)
     {
-        resultStruct.result = bestDistanceValue;
-        resultStruct.numberOfSteps = nOfSteps;
-        resultStruct.numberOfCheckedResults = nOfSteps;
-        resultStruct.resultPermutation = bestPath;
-    }
-    delete[] finallPath;  
-      
-    return bestDistanceValue;
-}
-
-int RandomWalk(Matrix distanceMatrix, int nOfCities, int timeInS, ResultStruct &resultStruct){
-
-    time_t current_time = time(NULL);
-
-    int bestDistanceValue = 9999999;
-    int *finallPath = RandomPermutation(nOfCities);
-    int newDistanceValue = 0;
-    int oldDistanceValue = 0;
-    int nOfSteps = 0;
-    std::vector<int> bestPath;
-
-    for(int i =0; i<nOfCities-1;i++){
-            int cost = distanceMatrix.GetValue( finallPath[i],finallPath[i+1]);
-            oldDistanceValue = oldDistanceValue + cost;
-        }
-    oldDistanceValue = oldDistanceValue + distanceMatrix.GetValue( finallPath[nOfCities- 1],finallPath[0]);
-
-    while(time(NULL) < current_time+ timeInS){
-        Pair swappedIndexes = getRandomNeighbour(finallPath,nOfCities);
-
-        newDistanceValue = oldDistanceValue - getCostDiffForNeighbour(finallPath,distanceMatrix,swappedIndexes,nOfCities); 
-        
-        if (newDistanceValue < bestDistanceValue){
-            bestDistanceValue = newDistanceValue;
-            bestPath = std::vector<int>(finallPath, finallPath + nOfCities);
-        }
-        oldDistanceValue =newDistanceValue;
-        nOfSteps++;
-    }
-    if (resultStruct.iterationNumber != -1)
-    {
-        resultStruct.result = bestDistanceValue;
+        resultStruct.finalResult = bestDistanceValue;
         resultStruct.numberOfSteps = nOfSteps;
         resultStruct.numberOfCheckedResults = nOfSteps;
         resultStruct.resultPermutation = bestPath;
@@ -255,7 +230,54 @@ int RandomWalk(Matrix distanceMatrix, int nOfCities, int timeInS, ResultStruct &
     delete[] finallPath;
 
     return bestDistanceValue;
-    
+}
+
+int RandomWalk(Matrix distanceMatrix, int nOfCities, double timeInMillisec, ResultStruct &resultStruct)
+{
+
+    time_t current_time = TimeSinceEpochMillisec();
+
+    int bestDistanceValue = INT32_MAX;
+    int *finallPath = RandomPermutation(nOfCities);
+    int newDistanceValue = 0;
+    int oldDistanceValue = 0;
+    int nOfSteps = 0;
+    std::vector<int> bestPath;
+
+    for (int i = 0; i < nOfCities - 1; i++)
+    {
+        int cost = distanceMatrix.GetValue(finallPath[i], finallPath[i + 1]);
+        oldDistanceValue = oldDistanceValue + cost;
+    }
+    oldDistanceValue = oldDistanceValue + distanceMatrix.GetValue(finallPath[nOfCities - 1], finallPath[0]);
+
+    if (resultStruct.iterationNumber != -1)
+        resultStruct.initialResult = oldDistanceValue;
+
+    while (TimeSinceEpochMillisec() < current_time + timeInMillisec)
+    {
+        Pair swappedIndexes = getRandomNeighbour(finallPath, nOfCities);
+
+        newDistanceValue = oldDistanceValue - getCostDiffForNeighbour(finallPath, distanceMatrix, swappedIndexes, nOfCities);
+
+        if (newDistanceValue < bestDistanceValue)
+        {
+            bestDistanceValue = newDistanceValue;
+            bestPath = std::vector<int>(finallPath, finallPath + nOfCities);
+        }
+        oldDistanceValue = newDistanceValue;
+        nOfSteps++;
+    }
+    if (resultStruct.iterationNumber != -1)
+    {
+        resultStruct.finalResult = bestDistanceValue;
+        resultStruct.numberOfSteps = nOfSteps;
+        resultStruct.numberOfCheckedResults = nOfSteps;
+        resultStruct.resultPermutation = bestPath;
+    }
+    delete[] finallPath;
+
+    return bestDistanceValue;
 }
 
 #endif

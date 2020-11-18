@@ -13,15 +13,15 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
 library(Cairo)
+print(getwd())
 ```
 
 ## Wczytanie danych
 ```{r load_data}
-print(getwd())
 results <- read.table("./../results/results.csv", head=TRUE, sep=",")
 #perm <- select(results, "resultPermutation")[1,1]
 #as.numeric(unlist(strsplit(perm, "\\|")))
-algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalker="RW")
+algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalk="RW")
 results <- mutate(results, algName=algs_symbols[algName])
 algs_unique_names <- unique(results[["algName"]])
 results <- as.data.frame(lapply(results, unlist))
@@ -58,7 +58,7 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=alg
   geom_line() +
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=diff-std, ymax=diff+std, width=0.15), position=pd) +
-  geom_text(aes(label=sprintf("%0.2f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+  # geom_text(aes(label=sprintf("%0.2f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
   labs(x="Instancje", y="Średnia jakość - mniej = lepiej") +
   scale_color_discrete(name="Algorytm")
   
@@ -74,7 +74,7 @@ gp <- summarize(gp, diff=min((finalResult-optimalResult)/optimalResult), std=sd(
 
 pd <- position_dodge(0.3)
 plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, colour=algName)) +
-  geom_line() +
+  # geom_line() +
   geom_point(size=3, shape=21, fill="white", position=pd) +
   # geom_errorbar(aes(ymin=diff-std, ymax=diff+std, width=0.15), position=pd) +
   geom_text(aes(label=sprintf("%0.1f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
@@ -180,6 +180,7 @@ plot <- ggplot(gp, aes(x=reorder(setName, nOfCities), y=meanNumberOfCheckedResul
   labs(x="Instancje", y="Średnia liczba ocenionych rozwiązań") +
   scale_color_discrete(name="Algorytm")
 
+  print(plot)
   
   filename <- paste("../results/zad2_point5_all", ".pdf", sep="")
   ggsave(filename, plot=plot, device=cairo_pdf)
@@ -221,13 +222,8 @@ gp$meanResult = meanResult
  plot <- ggplot(gp, aes(x=iterationNumber)) +
    geom_point(aes(y=meanResult, colour="Średnia jakość")) +
    geom_point(aes(y=minResult, colour="Maksymalna jakość")) +
-   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="") +
-   theme(
-    legend.position = c(.95, .95),
-    legend.justification = c("right", "top"),
-    legend.box.just = "right",
-    legend.margin = margin(6, 6, 6, 6)
-    )
+   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="")
+ 
  print(plot)
  filename <- paste("../results/zad4_all", ".pdf", sep="")
  ggsave(filename, plot=plot, device=cairo_pdf)

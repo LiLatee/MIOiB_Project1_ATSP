@@ -25,8 +25,8 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         double greedyTime = MeasureTimeOfFunctionInMilliSeconds(1, "Greedy", Greedy, distanceMatrix, nOfCities, result);
         double steepestTime = MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities, result);
         double simpleHeurTime = MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities, result);
-        double timeInSecForRandoms =(greedyTime + steepestTime) / (2 * 1000);
-        std::cout<<"timeInSecForRandoms in sec: "<<timeInSecForRandoms<<std::endl;
+        double timeInMillisecForRandoms = (greedyTime + steepestTime) / (2);
+        std::cout << "timeInSecForRandoms in sec: " << timeInMillisecForRandoms << std::endl;
 
         vector<ResultStruct> steepestResults;
         for (size_t i = 0; i < nOfIterations; i++)
@@ -82,8 +82,8 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
             result.nOfCities = nOfCities;
             result.iterationNumber = i;
             result.optimalResult = optimalResults[setName];
-            result.timeOfRunningInMs = timeInSecForRandoms;
-            Random(distanceMatrix, nOfCities,timeInSecForRandoms, result);
+            result.timeOfRunningInMs = timeInMillisecForRandoms;
+            Random(distanceMatrix, nOfCities, timeInMillisecForRandoms, result);
             randomResults.push_back(result);
         }
         SaveResultsToCSV(randomResults, resultsFilePath);
@@ -97,8 +97,8 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
             result.nOfCities = nOfCities;
             result.iterationNumber = i;
             result.optimalResult = optimalResults[setName];
-            result.timeOfRunningInMs = timeInSecForRandoms;
-            RandomWalk(distanceMatrix, nOfCities,timeInSecForRandoms, result);
+            result.timeOfRunningInMs = timeInMillisecForRandoms;
+            RandomWalk(distanceMatrix, nOfCities, timeInMillisecForRandoms, result);
             randomWalkResults.push_back(result);
         }
         SaveResultsToCSV(randomWalkResults, resultsFilePath);
@@ -120,7 +120,6 @@ int main(int argc, char **argv)
     std::cout << "Results path: " << resultsFilePath << std::endl;
     RunTests(setsPath, resultsFilePath, nOfIterations, optimalResultsPath);
 
-
     //// testowanie ComputePossibleValue
     // int parentPermutation[] = {0,1,2,3,4};
     // int nOfCities = 5;
@@ -134,11 +133,11 @@ int main(int argc, char **argv)
     // int *currentDistancesArray = GetArrayOfDistances(parentPermutation, nOfCities, distanceMatrix);
     // int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
     // int parentValue = SumOfarray(currentDistancesArray, nOfCities);
-    // std::cout << "====================================PRZED====================================\n"; 
+    // std::cout << "====================================PRZED====================================\n";
     // PrintVector(parentPermutation, nOfCities);
     // PrintVector(currentDistancesArray, nOfCities);
     // std::cout << "parentValue: " << parentValue << std::endl;
-    
+
     // int p1 = std::stoi(argv[1]);
     // int p2 = std::stoi(argv[2]);
     // Pair<int> swappedIndexes = Pair(p1, p2);
@@ -147,7 +146,7 @@ int main(int argc, char **argv)
     // std::copy(parentPermutation, parentPermutation+nOfCities, newPermutation);
     // std::swap(newPermutation[p1], newPermutation[p2]);
     // int *newDistancesArray = GetArrayOfDistances(newPermutation, nOfCities, distanceMatrix);
-    // std::cout << "====================================PO====================================\n";   
+    // std::cout << "====================================PO====================================\n";
     // PrintVector(newPermutation, nOfCities);
     // PrintVector(newDistancesArray, nOfCities);
     // std::cout << "newValue: " << newValue << std::endl;
