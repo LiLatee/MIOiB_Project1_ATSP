@@ -7,9 +7,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Biblioteki
-```{r libraries}
+## Biblioteki instalowanie
+```{r libraries_install, cache=TRUE}
 # install.packages("Cairo")
+# install.packages("ggpubr")
+```
+## Biblioteki wczytywanie
+```{r libraries_load}
+library(ggpubr)
 library(dplyr)
 library(ggplot2)
 library(Cairo)
@@ -154,8 +159,10 @@ ggsave(filename, plot=plot, device=cairo_pdf)
 
 ## Zadanie 2 - punkt 4
 ```{r zad2_point4}
-temp <- group_by(results, algName, setName)
-temp <- summarize(temp, meanNumberOfSteps=mean(numberOfSteps), std=sd(numberOfSteps), nOfCities=mean(nOfCities))
+
+temp <- group_by(results, algName, setName) %>%
+  filter(algName=='G' | algName=='S') %>%
+  summarize(meanNumberOfSteps=mean(numberOfSteps), std=sd(numberOfSteps), nOfCities=mean(nOfCities))
 
 pd <- position_dodge(0.3)
 plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfSteps, group=algName, colour=algName)) +
@@ -174,8 +181,9 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfSteps, gro
 
 ## Zadanie 2 - punkt 5
 ```{r zad2_point5}
-temp <- group_by(results, algName, setName)
-temp <- summarize(temp, meanNumberOfCheckedResults=mean(numberOfCheckedResults), std=sd(numberOfCheckedResults), nOfCities=mean(nOfCities))
+temp <- group_by(results, algName, setName) %>%
+  filter(algName!='H') %>%
+  summarize(meanNumberOfCheckedResults=mean(numberOfCheckedResults), std=sd(numberOfCheckedResults), nOfCities=mean(nOfCities))
 
 pd <- position_dodge(0.3)
 plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfCheckedResults, group=algName, colour=algName)) +
@@ -183,6 +191,7 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfCheckedRes
   geom_point(size=3, shape=21, fill="white", position=pd) +
   geom_errorbar(aes(ymin=meanNumberOfCheckedResults-std, ymax=meanNumberOfCheckedResults+std, width=0.15), position=pd) +
   #geom_text(aes(label=sprintf("%0.1f", round(meanNumberOfCheckedResults, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), labels = trans_format("log10", math_format(10^.x))) +
   labs(x="Instancje", y="Średnia liczba ocenionych rozwiązań") +
   scale_color_manual(values=colors, name="Algorytm")
 
@@ -207,8 +216,9 @@ plot <- ggplot(temp, aes(x=initialResult, y=finalResult, group=algName, colour=a
   ggsave(filename, plot=plot, device=cairo_pdf)
 ```
 
-## Zadanie 4
-```{r zad4_all}
+## Zadanie 4 - Greedy
+```{r zad4_greedy}
+########################### zbior br17
 temp <- select(results, algName, iterationNumber, setName, finalResult)
 temp <- filter(temp, algName=="G", setName=="br17")
 # knitr::kable(temp)
@@ -227,12 +237,101 @@ temp$minResult = minResult
 temp$meanResult = meanResult
 
 
- plot <- ggplot(temp, aes(x=iterationNumber)) +
+ plot1 <- ggplot(temp, aes(x=iterationNumber)) +
    geom_point(aes(y=meanResult, colour="Średnia jakość")) +
    geom_point(aes(y=minResult, colour="Maksymalna jakość")) +
    labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="")
  
- print(plot)
- filename <- paste("../results/zad4_all", ".pdf", sep="")
- ggsave(filename, plot=plot, device=cairo_pdf)
+ 
+########################### zbior rgb443
+temp <- select(results, algName, iterationNumber, setName, finalResult)
+temp <- filter(temp, algName=="G", setName=="rbg443")
+#knitr::kable(temp)
+numberOfIterations = max(temp[["iterationNumber"]])
+
+minResult = rep(0, numberOfIterations+1)
+meanResult = rep(0, numberOfIterations+1)
+print(temp[1, ][["algName"]])
+for(row in 1:nrow(temp))
+{
+  minResult[row] = min(temp[1:row, ][["finalResult"]])
+  meanResult[row] = mean(temp[1:row, ][["finalResult"]])
+}
+
+temp$minResult = minResult
+temp$meanResult = meanResult
+
+
+ plot2 <- ggplot(temp, aes(x=iterationNumber)) +
+   geom_point(aes(y=meanResult, colour="Średnia jakość")) +
+   geom_point(aes(y=minResult, colour="Maksymalna jakość")) +
+   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="")
+ 
+ 
+ together <- ggarrange(plot1 + theme(axis.title.x = element_blank()), 
+                       plot2, ncol = 1, nrow = 2, common.legend = TRUE, label.x=1)
+ 
+ print(together)
+ filename <- paste("../results/zad4_greedy", ".pdf", sep="")
+ ggsave(filename, plot=together, device=cairo_pdf)
+```
+
+## Zadanie 4 - Steepest
+```{r zad4_steepest}
+########################### zbior br17
+temp <- select(results, algName, iterationNumber, setName, finalResult)
+temp <- filter(temp, algName=="G", setName=="br17")
+# knitr::kable(temp)
+numberOfIterations = max(temp[["iterationNumber"]])
+
+minResult = rep(0, numberOfIterations+1)
+meanResult = rep(0, numberOfIterations+1)
+print(temp[1, ][["algName"]])
+for(row in 1:nrow(temp))
+{
+  minResult[row] = min(temp[1:row, ][["finalResult"]])
+  meanResult[row] = mean(temp[1:row, ][["finalResult"]])
+}
+
+temp$minResult = minResult
+temp$meanResult = meanResult
+
+
+ plot1 <- ggplot(temp, aes(x=iterationNumber)) +
+   geom_point(aes(y=meanResult, colour="Średnia jakość")) +
+   geom_point(aes(y=minResult, colour="Maksymalna jakość")) +
+   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="")
+ 
+ 
+########################### zbior rgb443
+temp <- select(results, algName, iterationNumber, setName, finalResult)
+temp <- filter(temp, algName=="G", setName=="rbg443")
+#knitr::kable(temp)
+numberOfIterations = max(temp[["iterationNumber"]])
+
+minResult = rep(0, numberOfIterations+1)
+meanResult = rep(0, numberOfIterations+1)
+print(temp[1, ][["algName"]])
+for(row in 1:nrow(temp))
+{
+  minResult[row] = min(temp[1:row, ][["finalResult"]])
+  meanResult[row] = mean(temp[1:row, ][["finalResult"]])
+}
+
+temp$minResult = minResult
+temp$meanResult = meanResult
+
+
+ plot2 <- ggplot(temp, aes(x=iterationNumber)) +
+   geom_point(aes(y=meanResult, colour="Średnia jakość")) +
+   geom_point(aes(y=minResult, colour="Maksymalna jakość")) +
+   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="")
+ 
+ 
+ together <- ggarrange(plot1 + theme(axis.title.x = element_blank()), plot2, 
+          ncol = 1, nrow = 2, common.legend = TRUE)
+ 
+ print(together)
+ filename <- paste("../results/zad4_steepest", ".pdf", sep="")
+ ggsave(filename, plot=together, device=cairo_pdf)
 ```
