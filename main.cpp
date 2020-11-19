@@ -26,7 +26,7 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         double steepestTime = MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities, result);
         double simpleHeurTime = MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities, result);
         double timeInMillisecForRandoms = (greedyTime + steepestTime) / (2);
-        std::cout << "timeInSecForRandoms in sec: " << timeInMillisecForRandoms << std::endl;
+        std::cout << "timeInMillisecForRandoms: " << timeInMillisecForRandoms << std::endl;
 
         vector<ResultStruct> steepestResults;
         for (size_t i = 0; i < nOfIterations; i++)
