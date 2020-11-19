@@ -133,7 +133,7 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
     int possibleDistance = 0;
     int nOfSteps = 0;
 
-    while (icities < nOfCities - 1)
+    while (icities < nOfCities)
     {
         destinationCityIndex = icities;
         currentDistance = INT32_MAX;
@@ -155,13 +155,6 @@ int SimpleHeur(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
         icities++;
     }
     distanceValue = distanceValue + distanceMatrix.GetValue(finallPath[nOfCities - 1], finallPath[0]);
-
-    int sum = 0;
-    for (int i = 0; i < nOfCities - 1; i++)
-    {
-        int cost = distanceMatrix.GetValue(finallPath[i + 1], finallPath[i]);
-        sum = sum + cost;
-    }
 
     if (resultStruct.iterationNumber != -1)
     {

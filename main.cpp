@@ -18,6 +18,7 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         std::string setName = entry.path().stem();
         std::cout << "Set: \t " << setName << std::endl;
         int nOfCities;
+        std::string path ="/mnt/d/Dokumenty/Uczelnia/MIOiB/Project1_ATSP/data/unpacked_ready/chosen_sets/p43.atsp";
         Matrix distanceMatrix = LoadData(entry.path(), nOfCities);
 
         ResultStruct result;
