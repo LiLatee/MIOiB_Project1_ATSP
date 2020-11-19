@@ -80,7 +80,7 @@ temp <- summarize(temp, diff=min(quality(finalResult, optimalResult)), std=sd(qu
 
 pd <- position_dodge(0.3)
 plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=algName, colour=algName)) +
-  # geom_line(size=1) +
+  geom_line(size=1) +
   geom_point(size=3, shape=21, fill="white", position=pd) +
   # geom_errorbar(aes(ymin=diff-std, ymax=diff+std, width=0.15), position=pd) +
   #geom_text(aes(label=sprintf("%0.1f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25, size=3) +
@@ -139,12 +139,12 @@ temp <- group_by(results, algName, setName)
 temp <- summarize(temp, timeOfRunningInMs=mean(timeOfRunningInMs),diff=mean(quality(finalResult, optimalResult)), nOfCities=mean(nOfCities))
 # temp <- select(results, algName, setName, initialResult, finalResult)
 
-plot <- ggplot(temp, aes(x=timeOfRunningInMs, y=diff, colour=algName)) +
+plot <- ggplot(temp, aes(x=timeOfRunningInMs, y=diff, group=algName, colour=algName)) +
   #geom_line(size=1) +
-  geom_point() +
-  labs(x="Czas działania [ms]", y="Średnia jakość - mniej = lepiej", colour="Algorytm") +
-  scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x), labels = trans_format("log10", math_format(10^.x)))
-  # scale_x_log10()
+  geom_point(size=2) +
+  labs(x="Czas działania [ms]", y="Średnia jakość - mniej = lepiej") +
+  scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x), labels = trans_format("log10", math_format(10^.x))) +
+  scale_color_manual(values=colors, name="Algorytm")
 
 
 print(plot)
@@ -194,11 +194,13 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=meanNumberOfCheckedRes
 
 ## Zadanie 3
 ```{r zad3_all}
-temp <- select(results, algName, setName, initialResult, finalResult)
+temp <- select(results, algName, setName, initialResult, finalResult) %>%
+  filter(algName=='G' | algName=='S')
 
 plot <- ggplot(temp, aes(x=initialResult, y=finalResult, group=algName, colour=algName)) +
   facet_wrap(~setName, scales="free") +
-  geom_point()
+  geom_point() +
+  scale_color_manual(values=colors, name="Algorytm")
 
   filename <- paste("../results/zad3_all", ".pdf", sep="")
   print(plot)
