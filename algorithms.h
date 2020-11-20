@@ -250,8 +250,9 @@ int RandomWalk(Matrix distanceMatrix, int nOfCities, double timeInMillisec, Resu
     while (TimeSinceEpochMillisec() < current_time + timeInMillisec)
     {
         Pair swappedIndexes = getRandomNeighbour(finallPath, nOfCities);
-
-        newDistanceValue = oldDistanceValue - getCostDiffForNeighbour(finallPath, distanceMatrix, swappedIndexes, nOfCities);
+        
+        newDistanceValue =  ComputePossibleValue(finallPath,oldDistanceValue, distanceMatrix, swappedIndexes, nOfCities);//oldDistanceValue - getCostDiffForNeighbour(finallPath, distanceMatrix, swappedIndexes, nOfCities);
+        std::swap(finallPath[swappedIndexes.first], finallPath[swappedIndexes.second]);
 
         if (newDistanceValue < bestDistanceValue)
         {
