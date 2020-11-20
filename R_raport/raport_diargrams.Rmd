@@ -23,7 +23,7 @@ print(getwd())
 
 ## Wczytanie danych
 ```{r load_data}
-results <- read.table("./../results/results_all_sets_500.csv", head=TRUE, sep=",")
+results <- read.table("./../results/results_zmian_Adam_500.csv", head=TRUE, sep=",")
 algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalk="RW")
 results <- mutate(results, algName=algs_symbols[algName])
 algs_unique_names <- unique(results[["algName"]])
