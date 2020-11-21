@@ -23,7 +23,7 @@ print(getwd())
 
 ## Wczytanie danych
 ```{r load_data}
-results <- read.table("./../results/results_zmian_Adam_500.csv", head=TRUE, sep=",")
+results <- read.table("./../results/results_500_RandomSavingChange.csv", head=TRUE, sep=",")
 algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalk="RW")
 results <- mutate(results, algName=algs_symbols[algName])
 algs_unique_names <- unique(results[["algName"]])
@@ -35,6 +35,13 @@ knitr::kable(head(results, 21))
 quality <- function(result, optimalResult)
 {
   (result-optimalResult)/optimalResult
+}
+
+permutationToVector <- function(permutation)
+{
+  vectorPermutationStrings <- strsplit(permutation, '[|]')
+  vectorPermutationIntegers <- lapply(vectorPermutationStrings, strtoi)
+  vectorPermutationIntegers
 }
 
 colors = c(G="#ff0000", S="#04ff00", R="#0004ff", RW="#ff9d00", H="#ff00fb")
@@ -53,9 +60,9 @@ plot <- ggplot(temp, aes(x=reorder(setName, nOfCities), y=diff, std=std, group=a
   ##geom_text(aes(label=sprintf("%0.1f", round(diff, digits=2))), position=position_dodge(width=0.9), vjust=-0.25) +
   labs(x="Instancje", y="Jakość", fill="Algorytm")
   
-  filename <- paste("../results/zad2_point1_all", ".pdf", sep="")
-  print(plot)
-  ggsave(filename, plot=plot, device=cairo_pdf)
+  # filename <- paste("../results/zad2_point1_all", ".pdf", sep="")
+  # print(plot)
+  # ggsave(filename, plot=plot, device=cairo_pdf)
 ```
 
 ## Zadanie 2 - punkt 1 - srednie wyniki - WSPOLNY WYKRES PUNKTOWY
@@ -233,21 +240,22 @@ print(paste("p43: ", p43_PCC))
 print(paste("kro124p: ", kro124p_PCC))
 # cor(x, y, method = c("pearson", "kendall", "spearman"))
 ```
-## Zadanie 4 - Greedy
+## Zadanie 4 - rbg443
 ```{r zad4_greedy}
-########################### zbior br17
-temp <- select(results, algName, iterationNumber, setName, finalResult)
-temp <- filter(temp, algName=="G", setName=="br17")
+########################### Greedy
+chosenSetName = "rbg443"
+temp <- select(results, algName, iterationNumber, setName, finalResult, optimalResult)
+temp <- filter(temp, algName=="G", setName==chosenSetName)
 # knitr::kable(temp)
 numberOfIterations = max(temp[["iterationNumber"]])
 
 minResult = rep(0, numberOfIterations+1)
 meanResult = rep(0, numberOfIterations+1)
-print(temp[1, ][["algName"]])
+optimalResult = temp[1, ][["optimalResult"]]
 for(row in 1:nrow(temp))
 {
-  minResult[row] = min(temp[1:row, ][["finalResult"]])
-  meanResult[row] = mean(temp[1:row, ][["finalResult"]])
+  minResult[row] = min(quality(temp[1:row, ][["finalResult"]], optimalResult))
+  meanResult[row] = mean(quality(temp[1:row, ][["finalResult"]], optimalResult))
 }
 
 temp$minResult = minResult
@@ -257,23 +265,24 @@ temp$meanResult = meanResult
  plot1 <- ggplot(temp, aes(x=iterationNumber)) +
    geom_point(aes(y=meanResult, colour="Średnia jakość")) +
    geom_point(aes(y=minResult, colour="Najlepsza jakość")) +
-   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="", title="br17") +
+   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="", title="Greedy") +
    theme(plot.title = element_text(hjust = 0.5))
 
 
-########################### zbior rgb443
-temp <- select(results, algName, iterationNumber, setName, finalResult)
-temp <- filter(temp, algName=="G", setName=="rbg443")
+########################### Stepeest
+temp <- select(results, algName, iterationNumber, setName, finalResult, optimalResult)
+temp <- filter(temp, algName=="S", setName==chosenSetName)
 #knitr::kable(temp)
 numberOfIterations = max(temp[["iterationNumber"]])
 
 minResult = rep(0, numberOfIterations+1)
 meanResult = rep(0, numberOfIterations+1)
-print(temp[1, ][["algName"]])
+
+optimalResult = temp[1, ][["optimalResult"]]
 for(row in 1:nrow(temp))
 {
-  minResult[row] = min(temp[1:row, ][["finalResult"]])
-  meanResult[row] = mean(temp[1:row, ][["finalResult"]])
+  minResult[row] = min(quality(temp[1:row, ][["finalResult"]], optimalResult))
+  meanResult[row] = mean(quality(temp[1:row, ][["finalResult"]], optimalResult))
 }
 
 temp$minResult = minResult
@@ -283,7 +292,7 @@ temp$meanResult = meanResult
  plot2 <- ggplot(temp, aes(x=iterationNumber)) +
    geom_point(aes(y=meanResult, colour="Średnia jakość")) +
    geom_point(aes(y=minResult, colour="Najlepsza jakość")) +
-   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="", title="rbg443") +
+   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="", title="Steepest") +
    theme(plot.title = element_text(hjust = 0.5))
 
 
@@ -291,25 +300,27 @@ temp$meanResult = meanResult
                        plot2, ncol = 1, nrow = 2, common.legend = TRUE, label.x=1)
 
  print(together)
- filename <- paste("../results/zad4_greedy", ".pdf", sep="")
+ filename <- paste("../results/zad4_",chosenSetName ,".pdf", sep="")
  ggsave(filename, plot=together, device=cairo_pdf)
 ```
 
-## Zadanie 4 - Steepest
+## Zadanie 4 - br17
 ```{r zad4_steepest}
-########################### zbior br17
-temp <- select(results, algName, iterationNumber, setName, finalResult)
-temp <- filter(temp, algName=="S", setName=="br17")
+########################### Greedy
+chosenSetName = "br17"
+temp <- select(results, algName, iterationNumber, setName, finalResult, optimalResult)
+temp <- filter(temp, algName=="G", setName==chosenSetName)
 # knitr::kable(temp)
 numberOfIterations = max(temp[["iterationNumber"]])
 
 minResult = rep(0, numberOfIterations+1)
 meanResult = rep(0, numberOfIterations+1)
-print(temp[1, ][["algName"]])
+
+optimalResult = temp[1, ][["optimalResult"]]
 for(row in 1:nrow(temp))
 {
-  minResult[row] = min(temp[1:row, ][["finalResult"]])
-  meanResult[row] = mean(temp[1:row, ][["finalResult"]])
+  minResult[row] = min(quality(temp[1:row, ][["finalResult"]], optimalResult))
+  meanResult[row] = mean(quality(temp[1:row, ][["finalResult"]], optimalResult))
 }
 
 temp$minResult = minResult
@@ -319,23 +330,24 @@ temp$meanResult = meanResult
  plot1 <- ggplot(temp, aes(x=iterationNumber)) +
    geom_point(aes(y=meanResult, colour="Średnia jakość")) +
    geom_point(aes(y=minResult, colour="Najlepsza jakość")) +
-   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="", title="br17") +
+   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="", title="Greedy") +
    theme(plot.title = element_text(hjust = 0.5))
 
 
-########################### zbior rbg443
-temp <- select(results, algName, iterationNumber, setName, finalResult)
-temp <- filter(temp, algName=="S", setName=="rbg443")
+########################### Steepest
+temp <- select(results, algName, iterationNumber, setName, finalResult, optimalResult)
+temp <- filter(temp, algName=="S", setName==chosenSetName)
 #knitr::kable(temp)
 numberOfIterations = max(temp[["iterationNumber"]])
 
 minResult = rep(0, numberOfIterations+1)
 meanResult = rep(0, numberOfIterations+1)
-print(temp[1, ][["algName"]])
+optimalResult = temp[1, ][["optimalResult"]]
+
 for(row in 1:nrow(temp))
 {
-  minResult[row] = min(temp[1:row, ][["finalResult"]])
-  meanResult[row] = mean(temp[1:row, ][["finalResult"]])
+  minResult[row] = min(quality(temp[1:row, ][["finalResult"]], optimalResult))
+  meanResult[row] = mean(quality(temp[1:row, ][["finalResult"]], optimalResult))
 }
 
 temp$minResult = minResult
@@ -345,7 +357,7 @@ temp$meanResult = meanResult
  plot2 <- ggplot(temp, aes(x=iterationNumber)) +
    geom_point(aes(y=meanResult, colour="Średnia jakość")) +
    geom_point(aes(y=minResult, colour="Najlepsza jakość")) +
-   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="", title="rbg443") +
+   labs(x="Numer przebiegu", y="Jakość - mniej = lepiej",  colour="", title="Steepest") +
    theme(plot.title = element_text(hjust = 0.5))
 
 
@@ -353,6 +365,45 @@ temp$meanResult = meanResult
           ncol = 1, nrow = 2, common.legend = TRUE)
 
  print(together)
- filename <- paste("../results/zad4_steepest", ".pdf", sep="")
+ filename <- paste("../results/zad4_",chosenSetName ,".pdf", sep="")
  ggsave(filename, plot=together, device=cairo_pdf)
+```
+
+``` {r zad5}
+chosenSetName = "br17"
+optResults <- select(results, algName, setName, finalResult, optimalResult, resultPermutation, iterationNumber) %>%
+  group_by(setName) %>%
+  summarise(min=min(finalResult))
+
+knitr::kable(optResults)
+optResult = filter(optResults, setName==chosenSetName)$min
+
+optPermutation <- filter(results, setName==chosenSetName, finalResult==optResult)$resultPermutation[1]
+optPermutation <- permutationToVector(optPermutation)
+print(paste("optPermutation: ", optPermutation))
+
+temp <- select(results, setName, resultPermutation) %>%
+  filter(setName==chosenSetName) %>%
+  mutate(optPerm=optPermutation, resultPermutation=permutationToVector(resultPermutation))
+  # mutate(d1 = unlist(optPerm))
+  # mutate(hm=dist(rbind(optPermutation, permutationToVector(resultPermutation))))
+  
+for (row in 1:nrow(temp))
+{
+  # temp[row, "permsSimilarity"] <- dist(rbind(temp[row, "optPerm"], temp[row, "resultPermutation"]))
+  # temp[row, "d1"] <- temp[row, "optPerm"]
+  # temp[row, "d2"] <- temp[row, "resultPermutation"]
+  hm1 <- unlist(temp[row, "resultPermutation"])
+  hm2 <- unlist(temp[row, "optPerm"])
+  wynik <- dist(rbind(hm1, hm2))
+  temp[row, "permsSimilarity"] <- wynik
+}
+
+knitr::kable(temp)
+# plot <- ggplot(temp, aes(x=reorder(algName, nOfCities), y=))) +
+#   geom_line()
+# 
+# print(plot)
+
+
 ```

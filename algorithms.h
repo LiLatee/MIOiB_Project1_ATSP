@@ -188,7 +188,7 @@ int Random(Matrix distanceMatrix, int nOfCities, double timeInMillisec, ResultSt
     if (resultStruct.iterationNumber != -1)
         resultStruct.initialResult = bestDistanceValue;
     while (TimeSinceEpochMillisec() < current_time + timeInMillisec)
-    {   
+    {
 
         int *newPath = RandomPermutation(nOfCities);
         int newDistanceValue = 0;
@@ -218,7 +218,10 @@ int Random(Matrix distanceMatrix, int nOfCities, double timeInMillisec, ResultSt
         resultStruct.finalResult = bestDistanceValue;
         resultStruct.numberOfSteps = nOfSteps;
         resultStruct.numberOfCheckedResults = nOfSteps;
-        resultStruct.resultPermutation = bestPath;
+        if (bestPath.size() == 0)
+            resultStruct.resultPermutation = std::vector<int>(finallPath, finallPath + nOfCities);
+        else
+            resultStruct.resultPermutation = bestPath;
     }
     delete[] finallPath;
 
@@ -250,8 +253,8 @@ int RandomWalk(Matrix distanceMatrix, int nOfCities, double timeInMillisec, Resu
     while (TimeSinceEpochMillisec() < current_time + timeInMillisec)
     {
         Pair swappedIndexes = getRandomNeighbour(finallPath, nOfCities);
-        
-        newDistanceValue =  ComputePossibleValue(finallPath,oldDistanceValue, distanceMatrix, swappedIndexes, nOfCities);//oldDistanceValue - getCostDiffForNeighbour(finallPath, distanceMatrix, swappedIndexes, nOfCities);
+
+        newDistanceValue = ComputePossibleValue(finallPath, oldDistanceValue, distanceMatrix, swappedIndexes, nOfCities); //oldDistanceValue - getCostDiffForNeighbour(finallPath, distanceMatrix, swappedIndexes, nOfCities);
         std::swap(finallPath[swappedIndexes.first], finallPath[swappedIndexes.second]);
 
         if (newDistanceValue < bestDistanceValue)
@@ -267,7 +270,10 @@ int RandomWalk(Matrix distanceMatrix, int nOfCities, double timeInMillisec, Resu
         resultStruct.finalResult = bestDistanceValue;
         resultStruct.numberOfSteps = nOfSteps;
         resultStruct.numberOfCheckedResults = nOfSteps;
-        resultStruct.resultPermutation = bestPath;
+        if (bestPath.size() == 0)
+            resultStruct.resultPermutation = std::vector<int>(finallPath, finallPath + nOfCities);
+        else
+            resultStruct.resultPermutation = bestPath;
     }
     delete[] finallPath;
 
