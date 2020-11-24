@@ -1,0 +1,37 @@
+---
+title: "Untitled"
+author: "Adam Klejda"
+date: "23 11 2020"
+output: html_document
+---
+---
+title: "raport_diagrams"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Biblioteki instalowanie
+```{r libraries_install, cache=TRUE}
+# install.packages("Cairo")
+# install.packages("ggpubr")
+```
+## Biblioteki wczytywanie
+```{r libraries_load}
+library(dplyr)
+library(ggplot2)
+library(Cairo)
+print(getwd())
+```
+
+## Wczytanie danych
+```{r load_data}
+results <- read.table("./../results/results_500_RandomSavingChange.csv", head=TRUE, sep=",")
+algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalk="RW")
+results <- mutate(results, algName=algs_symbols[algName])
+algs_unique_names <- unique(results[["algName"]])
+results <- as.data.frame(lapply(results, unlist))
+knitr::kable(head(results, 21))
+```
