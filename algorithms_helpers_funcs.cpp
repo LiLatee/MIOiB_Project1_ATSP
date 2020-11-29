@@ -241,7 +241,7 @@ int getCostDiffForNeighbour(int *arr, Matrix distanceMatrix, Pair<int> swappedIn
     return currentCost - oldCost;
 }
 
-int genInitCValue(Matrix distanceMatrix, int nOfCities, int nOfSamples)
+int genMaxDiffValueInSamples(Matrix distanceMatrix, int nOfCities, int nOfSamples)
 {
     int minValue = INT32_MAX;
     int maxValue = INT32_MIN;
@@ -261,6 +261,11 @@ int genInitCValue(Matrix distanceMatrix, int nOfCities, int nOfSamples)
     }
 
     return abs(minValue - maxValue);
+}
+
+float getInitCValue(float factor, int diff)
+{
+    return (-diff)/std::log(factor);
 }
 
 #endif

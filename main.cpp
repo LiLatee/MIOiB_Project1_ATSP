@@ -24,26 +24,28 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         ResultStruct result;
         // mierzymy czas, aby Random i RandomWalker miały mniej więcej tyle samu czasu.
         double greedyTime = MeasureTimeOfFunctionInMilliSeconds(1, "Greedy", Greedy, distanceMatrix, nOfCities, result);
-        // double steepestTime = MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities, result);
+        double steepestTime = MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities, result);
         double SWTime = MeasureTimeOfFunctionInMilliSeconds(1, "SW", SW, distanceMatrix, nOfCities, result);
-        // double simpleHeurTime = MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities, result);
+        // double SW2Time = MeasureTimeOfFunctionInMilliSeconds(1, "SW2", SW2, distanceMatrix, nOfCities, result);
+
+        double simpleHeurTime = MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities, result);
         // double timeInMillisecForRandoms = (greedyTime + steepestTime) / (2);
         // std::cout << "timeInMillisecForRandoms: " << timeInMillisecForRandoms << std::endl;
 
-        // vector<ResultStruct> steepestResults;
-        // for (size_t i = 0; i < nOfIterations; i++)
-        // {
-        //     ResultStruct result;
-        //     result.setName = setName;
-        //     result.algName = "Steepest";
-        //     result.nOfCities = nOfCities;
-        //     result.iterationNumber = i;
-        //     result.optimalResult = optimalResults[setName];
-        //     result.timeOfRunningInMs = steepestTime;
-        //     Greedy(distanceMatrix, nOfCities, result);
-        //     steepestResults.push_back(result);
-        // }
-        // SaveResultsToCSV(steepestResults, resultsFilePath);
+        vector<ResultStruct> steepestResults;
+        for (size_t i = 0; i < nOfIterations; i++)
+        {
+            ResultStruct result;
+            result.setName = setName;
+            result.algName = "Steepest";
+            result.nOfCities = nOfCities;
+            result.iterationNumber = i;
+            result.optimalResult = optimalResults[setName];
+            result.timeOfRunningInMs = steepestTime;
+            Greedy(distanceMatrix, nOfCities, result);
+            steepestResults.push_back(result);
+        }
+        SaveResultsToCSV(steepestResults, resultsFilePath);
 
         vector<ResultStruct> greedyResults;
         for (size_t i = 0; i < nOfIterations; i++)
@@ -60,20 +62,20 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         }
         SaveResultsToCSV(greedyResults, resultsFilePath);
 
-        // vector<ResultStruct> simpleHeurResults;
-        // for (size_t i = 0; i < nOfIterations; i++)
-        // {
-        //     ResultStruct result;
-        //     result.setName = setName;
-        //     result.algName = "SimpleHeur";
-        //     result.nOfCities = nOfCities;
-        //     result.iterationNumber = i;
-        //     result.optimalResult = optimalResults[setName];
-        //     result.timeOfRunningInMs = simpleHeurTime;
-        //     SimpleHeur(distanceMatrix, nOfCities, result);
-        //     simpleHeurResults.push_back(result);
-        // }
-        // SaveResultsToCSV(simpleHeurResults, resultsFilePath);
+        vector<ResultStruct> simpleHeurResults;
+        for (size_t i = 0; i < nOfIterations; i++)
+        {
+            ResultStruct result;
+            result.setName = setName;
+            result.algName = "SimpleHeur";
+            result.nOfCities = nOfCities;
+            result.iterationNumber = i;
+            result.optimalResult = optimalResults[setName];
+            result.timeOfRunningInMs = simpleHeurTime;
+            SimpleHeur(distanceMatrix, nOfCities, result);
+            simpleHeurResults.push_back(result);
+        }
+        SaveResultsToCSV(simpleHeurResults, resultsFilePath);
 
         // vector<ResultStruct> randomResults;
         // for (size_t i = 0; i < nOfIterations; i++)
@@ -119,6 +121,21 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
             SWResults.push_back(result);
         }
         SaveResultsToCSV(SWResults, resultsFilePath);
+
+        // vector<ResultStruct> SW2Results;
+        // for (size_t i = 0; i < nOfIterations; i++)
+        // {
+        //     ResultStruct result;
+        //     result.setName = setName;
+        //     result.algName = "SW2";
+        //     result.nOfCities = nOfCities;
+        //     result.iterationNumber = i;
+        //     result.optimalResult = optimalResults[setName];
+        //     result.timeOfRunningInMs = SW2Time;
+        //     SW2(distanceMatrix, nOfCities, result);
+        //     SW2Results.push_back(result);
+        // }
+        // SaveResultsToCSV(SW2Results, resultsFilePath);
 
         // TODO to samo dla SimpleHeur, R i RW dodać
     }
