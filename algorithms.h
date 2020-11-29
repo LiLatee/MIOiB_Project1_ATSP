@@ -281,12 +281,12 @@ int RandomWalk(Matrix distanceMatrix, int nOfCities, double timeInMillisec, Resu
     return bestDistanceValue;
 }
 
-int SW(Matrix distanceMatrix, int nOfCities, double timeInMillisec, ResultStruct &resultStruct)
+int SW(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 {
     const int nOfSamples = 1000;
     const int maxNOfstepsWithouCChange = nOfCities * nOfCities * 3;
     const float alpha = 0.99;
-    const int maxNOfstepsWithouValueChange = 1000;
+    const int maxNOfstepsWithouValueImprovement = 10000;
 
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
@@ -306,72 +306,57 @@ int SW(Matrix distanceMatrix, int nOfCities, double timeInMillisec, ResultStruct
     bool done = false;
     int nOfSteps = 0;
     int nOfAllCheckedResults = 0;
-    int nOfstepsWithouValueChange = 0;
-    // int wholeTime = 0;
+    int nOfstepsWithouImprovement = 0;
     while (!done)
     {
         // std::cout << "Current result: " << currentPermutationValue << std::endl;
-        bool isBetterResult = false;
-        for (int i = 0; i < nOfCities; i++)
+
+        Pair<int> swappedIndex = getRandomNeighbour(currentPermutation, nOfCities);
+        int neighbourValue = ComputePossibleValue(currentPermutation, currentPermutationValue, distanceMatrix, swappedIndex, nOfCities);
+        nOfAllCheckedResults++;
+        // std::cout << "curr: " << currentPermutationValue << "\tneigh: " << neighbourValue << std::endl;
+        if (neighbourValue <= currentPermutationValue)
         {
-            for (int j = 1 + i; j < nOfCities; j++)
+            // std::cout << "LEPSZY\n";
+            std::swap(currentPermutation[swappedIndex[0]], currentPermutation[swappedIndex[1]]);
+            currentPermutationValue = neighbourValue;
+
+            nOfstepsWithouImprovement++;
+            nOfSteps++;
+            stepsWthoutCChange++;
+
+            if (currentPermutationValue < bestPermutationValue)
             {
-                if (nOfstepsWithouValueChange > maxNOfstepsWithouValueChange)
-                    done = true;
-
-                if (stepsWthoutCChange > maxNOfstepsWithouCChange)
-                {
-                    C *= alpha;
-                    stepsWthoutCChange = 0;
-                }
-
-                // int start = TimeSinceEpochMillisec();
-                int neighbourValue = ComputePossibleValue(currentPermutation, currentPermutationValue, distanceMatrix, Pair<int>(i, j), nOfCities);
-                nOfAllCheckedResults++;
-                // std::cout << "curr: " << currentPermutationValue << "\tneigh: " << neighbourValue << std::endl;
-                // wholeTime += TimeSinceEpochMillisec() - start;
-                if (neighbourValue < currentPermutationValue)
-                {
-                    // std::cout << "LEPSZY\n";
-                    std::swap(currentPermutation[i], currentPermutation[j]);
-                    currentPermutationValue = neighbourValue;
-
-                    if (currentPermutationValue < bestPermutationValue)
-                    {
-                        std::copy(currentPermutation, currentPermutation + nOfCities, bestPermutation); // TODO
-                        bestPermutationValue = currentPermutationValue;
-                    }
-
-                    nOfstepsWithouValueChange = 0;
-                    isBetterResult = true;
-                    nOfSteps++;
-                    stepsWthoutCChange++;
-                    break;
-                }
-                else if (neighbourValue >= currentPermutationValue)
-                {
-                    // std::cout << "GORSZY\n";
-                    nOfstepsWithouValueChange++;
-                    float randomNumber = (float)std::rand() / RAND_MAX;
-                    float prob = std::exp((-neighbourValue - currentPermutationValue) / C);
-                    if (prob > randomNumber)
-                    {
-                        // std::cout << "GORSZY SWAP\n";
-                        std::swap(currentPermutation[i], currentPermutation[j]);
-                        currentPermutationValue = neighbourValue;
-                        isBetterResult = true;
-                        nOfSteps++;
-                        stepsWthoutCChange++;
-                        break;
-                    }
-                }
-                else if (i == nOfCities - 2 && j == nOfCities - 1)
-                    done = true;
-
-                isBetterResult = false;
+                std::copy(currentPermutation, currentPermutation + nOfCities, bestPermutation); // TODO
+                bestPermutationValue = currentPermutationValue;
+                nOfstepsWithouImprovement = 0;
             }
-            if (isBetterResult)
-                break;
+
+
+        }
+        else if (neighbourValue > currentPermutationValue)
+        {
+            // std::cout << "GORSZY\n";
+            nOfstepsWithouImprovement++;
+            float randomNumber = (float)std::rand() / RAND_MAX;
+            float prob = std::exp((-neighbourValue - currentPermutationValue) / C);
+            if (prob > randomNumber)
+            {
+                // std::cout << "GORSZY SWAP\n";
+                std::swap(currentPermutation[swappedIndex[0]], currentPermutation[swappedIndex[1]]);
+                currentPermutationValue = neighbourValue;
+                nOfSteps++;
+                stepsWthoutCChange++;
+            }
+        }
+
+        if (nOfstepsWithouImprovement > maxNOfstepsWithouValueImprovement)
+            done = true;
+
+        if (stepsWthoutCChange > maxNOfstepsWithouCChange)
+        {
+            C *= alpha;
+            stepsWthoutCChange = 0;
         }
     }
     // std::cout << "wholeTime: " << wholeTime << std::endl;

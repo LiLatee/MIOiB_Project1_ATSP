@@ -24,10 +24,11 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         ResultStruct result;
         // mierzymy czas, aby Random i RandomWalker miały mniej więcej tyle samu czasu.
         double greedyTime = MeasureTimeOfFunctionInMilliSeconds(1, "Greedy", Greedy, distanceMatrix, nOfCities, result);
-        double steepestTime = MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities, result);
-        double simpleHeurTime = MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities, result);
-        double timeInMillisecForRandoms = (greedyTime + steepestTime) / (2);
-        std::cout << "timeInMillisecForRandoms: " << timeInMillisecForRandoms << std::endl;
+        // double steepestTime = MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities, result);
+        double SWTime = MeasureTimeOfFunctionInMilliSeconds(1, "SW", SW, distanceMatrix, nOfCities, result);
+        // double simpleHeurTime = MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities, result);
+        // double timeInMillisecForRandoms = (greedyTime + steepestTime) / (2);
+        // std::cout << "timeInMillisecForRandoms: " << timeInMillisecForRandoms << std::endl;
 
         // vector<ResultStruct> steepestResults;
         // for (size_t i = 0; i < nOfIterations; i++)
@@ -44,20 +45,20 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         // }
         // SaveResultsToCSV(steepestResults, resultsFilePath);
 
-        // vector<ResultStruct> greedyResults;
-        // for (size_t i = 0; i < nOfIterations; i++)
-        // {
-        //     ResultStruct result;
-        //     result.setName = setName;
-        //     result.algName = "Greedy";
-        //     result.nOfCities = nOfCities;
-        //     result.iterationNumber = i;
-        //     result.optimalResult = optimalResults[setName];
-        //     result.timeOfRunningInMs = greedyTime;
-        //     Greedy(distanceMatrix, nOfCities, result);
-        //     greedyResults.push_back(result);
-        // }
-        // SaveResultsToCSV(greedyResults, resultsFilePath);
+        vector<ResultStruct> greedyResults;
+        for (size_t i = 0; i < nOfIterations; i++)
+        {
+            ResultStruct result;
+            result.setName = setName;
+            result.algName = "Greedy";
+            result.nOfCities = nOfCities;
+            result.iterationNumber = i;
+            result.optimalResult = optimalResults[setName];
+            result.timeOfRunningInMs = greedyTime;
+            Greedy(distanceMatrix, nOfCities, result);
+            greedyResults.push_back(result);
+        }
+        SaveResultsToCSV(greedyResults, resultsFilePath);
 
         // vector<ResultStruct> simpleHeurResults;
         // for (size_t i = 0; i < nOfIterations; i++)
@@ -113,8 +114,8 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
             result.nOfCities = nOfCities;
             result.iterationNumber = i;
             result.optimalResult = optimalResults[setName];
-            result.timeOfRunningInMs = timeInMillisecForRandoms;
-            SW(distanceMatrix, nOfCities, timeInMillisecForRandoms, result);
+            result.timeOfRunningInMs = SWTime;
+            SW(distanceMatrix, nOfCities, result);
             SWResults.push_back(result);
         }
         SaveResultsToCSV(SWResults, resultsFilePath);
