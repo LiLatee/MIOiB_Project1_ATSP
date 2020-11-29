@@ -241,4 +241,26 @@ int getCostDiffForNeighbour(int *arr, Matrix distanceMatrix, Pair<int> swappedIn
     return currentCost - oldCost;
 }
 
+int genInitCValue(Matrix distanceMatrix, int nOfCities, int nOfSamples)
+{
+    int minValue = INT32_MAX;
+    int maxValue = INT32_MIN;
+    for (size_t i = 0; i < nOfSamples; i++)
+    {
+        int *permutation = RandomPermutation(nOfCities);
+        int *distancesArray = GetArrayOfDistances(permutation, nOfCities, distanceMatrix);
+        int permutationValue = SumOfarray(distancesArray, nOfCities);
+        Pair<int> swappedIndex = getRandomNeighbour(permutation, nOfCities);
+        int neighbourValue = ComputePossibleValue(permutation, permutationValue, distanceMatrix, swappedIndex, nOfCities);
+        int diff = abs(permutationValue-neighbourValue);
+
+        if (diff > maxValue)
+            maxValue = diff;
+        else if(diff < minValue)
+            minValue = diff;
+    }
+
+    return abs(minValue - maxValue);
+}
+
 #endif

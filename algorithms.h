@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "matrix.h"
 #include "util.cpp"
 #include "algorithms_helpers_funcs.cpp"
@@ -278,6 +279,115 @@ int RandomWalk(Matrix distanceMatrix, int nOfCities, double timeInMillisec, Resu
     delete[] finallPath;
 
     return bestDistanceValue;
+}
+
+int SW(Matrix distanceMatrix, int nOfCities, double timeInMillisec, ResultStruct &resultStruct)
+{
+    const int nOfSamples = 1000;
+    const int maxNOfstepsWithouCChange = nOfCities * nOfCities * 3;
+    const float alpha = 0.99;
+    const int maxNOfstepsWithouValueChange = 1000;
+
+    // initial random permutation
+    int *currentPermutation = RandomPermutation(nOfCities);
+    int *currentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, distanceMatrix);
+    int currentPermutationValue = SumOfarray(currentDistancesArray, nOfCities);
+
+    int *bestPermutation = new int[nOfCities];
+    std::copy(currentPermutation, currentPermutation + nOfCities, bestPermutation);
+    int bestPermutationValue = currentPermutationValue;
+
+    if (resultStruct.iterationNumber != -1)
+        resultStruct.initialResult = currentPermutationValue;
+    delete[] currentDistancesArray;
+
+    float C = genInitCValue(distanceMatrix, nOfCities, nOfSamples);
+    int stepsWthoutCChange = 0;
+    bool done = false;
+    int nOfSteps = 0;
+    int nOfAllCheckedResults = 0;
+    int nOfstepsWithouValueChange = 0;
+    // int wholeTime = 0;
+    while (!done)
+    {
+        // std::cout << "Current result: " << currentPermutationValue << std::endl;
+        bool isBetterResult = false;
+        for (int i = 0; i < nOfCities; i++)
+        {
+            for (int j = 1 + i; j < nOfCities; j++)
+            {
+                if (nOfstepsWithouValueChange > maxNOfstepsWithouValueChange)
+                    done = true;
+
+                if (stepsWthoutCChange > maxNOfstepsWithouCChange)
+                {
+                    C *= alpha;
+                    stepsWthoutCChange = 0;
+                }
+
+                // int start = TimeSinceEpochMillisec();
+                int neighbourValue = ComputePossibleValue(currentPermutation, currentPermutationValue, distanceMatrix, Pair<int>(i, j), nOfCities);
+                nOfAllCheckedResults++;
+                // std::cout << "curr: " << currentPermutationValue << "\tneigh: " << neighbourValue << std::endl;
+                // wholeTime += TimeSinceEpochMillisec() - start;
+                if (neighbourValue < currentPermutationValue)
+                {
+                    // std::cout << "LEPSZY\n";
+                    std::swap(currentPermutation[i], currentPermutation[j]);
+                    currentPermutationValue = neighbourValue;
+
+                    if (currentPermutationValue < bestPermutationValue)
+                    {
+                        std::copy(currentPermutation, currentPermutation + nOfCities, bestPermutation); // TODO
+                        bestPermutationValue = currentPermutationValue;
+                    }
+
+                    nOfstepsWithouValueChange = 0;
+                    isBetterResult = true;
+                    nOfSteps++;
+                    stepsWthoutCChange++;
+                    break;
+                }
+                else if (neighbourValue >= currentPermutationValue)
+                {
+                    // std::cout << "GORSZY\n";
+                    nOfstepsWithouValueChange++;
+                    float randomNumber = (float)std::rand() / RAND_MAX;
+                    float prob = std::exp((-neighbourValue - currentPermutationValue) / C);
+                    if (prob > randomNumber)
+                    {
+                        // std::cout << "GORSZY SWAP\n";
+                        std::swap(currentPermutation[i], currentPermutation[j]);
+                        currentPermutationValue = neighbourValue;
+                        isBetterResult = true;
+                        nOfSteps++;
+                        stepsWthoutCChange++;
+                        break;
+                    }
+                }
+                else if (i == nOfCities - 2 && j == nOfCities - 1)
+                    done = true;
+
+                isBetterResult = false;
+            }
+            if (isBetterResult)
+                break;
+        }
+    }
+    // std::cout << "wholeTime: " << wholeTime << std::endl;
+
+    // std::cout << "Finally Greedy result: " << currentPermutationValue << std::endl;
+    if (resultStruct.iterationNumber != -1)
+    {
+        resultStruct.finalResult = bestPermutationValue;
+        resultStruct.numberOfSteps = nOfSteps;
+        resultStruct.numberOfCheckedResults = nOfAllCheckedResults;
+        resultStruct.resultPermutation = std::vector<int>(bestPermutation, bestPermutation + nOfCities);
+    }
+
+    delete[] currentPermutation;
+    delete[] bestPermutation;
+    return bestPermutationValue;
 }
 
 #endif
