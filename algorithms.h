@@ -305,21 +305,19 @@ int SW(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 
     float maxDiff = genMaxDiffValueInSamples(distanceMatrix, nOfCities, nOfSamples);
     float C = getInitCValue(C0, maxDiff);
-    // double avgValueChange = maxDiff;
+    std::cout << "C: " << C << std::endl;
     int stepsWthoutCChange = 0;
     int nOfstepsWithoutImprovement = 0;
-    float valueChange;
 
     bool done = false;
     int nOfSteps = 0;
     int nOfAllCheckedResults = 0;
     while (!done)
     {
-        // std::cout << "Current result: " << currentPermutationValue << std::endl;
         Pair<int> swappedIndex = getRandomNeighbour(currentPermutation, nOfCities); // TODO
         int neighbourValue = ComputePossibleValue(currentPermutation, currentPermutationValue, distanceMatrix, swappedIndex, nOfCities);
         nOfAllCheckedResults++;
-        // std::cout << "curr: " << currentPermutationValue << "\tneigh: " << neighbourValue << std::endl;
+
         if (neighbourValue <= currentPermutationValue)
         {
             std::swap(currentPermutation[swappedIndex[0]], currentPermutation[swappedIndex[1]]);
@@ -339,7 +337,7 @@ int SW(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
         else if (neighbourValue > currentPermutationValue)
         {
             float randomNumber = (float)std::rand() / RAND_MAX;
-            float prob = std::exp((-neighbourValue - currentPermutationValue) / C);
+            float prob = std::exp(-(neighbourValue - currentPermutationValue) / C);
             if (prob > randomNumber)
             {
                 std::swap(currentPermutation[swappedIndex[0]], currentPermutation[swappedIndex[1]]);
