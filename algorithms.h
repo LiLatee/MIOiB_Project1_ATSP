@@ -284,11 +284,12 @@ int RandomWalk(Matrix distanceMatrix, int nOfCities, double timeInMillisec, Resu
 int SW(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 {
     const int nOfSamples = 10000;
-    const int L = (nOfCities * nOfCities);// / 2;
+    const int L = (nOfCities * (nOfCities - 1)) / 2;
     const float alpha = 0.9;
     const int P = 10;
     const int maxNOfstepsWithoutValueImprovement = L * P;
     const float C0 = 0.95;
+    const float minProbForChange = 0.001;
 
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
@@ -305,7 +306,7 @@ int SW(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 
     float maxDiff = genMaxDiffValueInSamples(distanceMatrix, nOfCities, nOfSamples);
     float C = getInitCValue(C0, maxDiff);
-    std::cout << "C: " << C << std::endl;
+    // std::cout << "C: " << C << std::endl;
     int stepsWthoutCChange = 0;
     int nOfstepsWithoutImprovement = 0;
 
@@ -343,9 +344,8 @@ int SW(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
                 std::swap(currentPermutation[swappedIndex[0]], currentPermutation[swappedIndex[1]]);
                 currentPermutationValue = neighbourValue;
             }
-            if (prob < 0.001 && nOfstepsWithoutImprovement > maxNOfstepsWithoutValueImprovement)
+            if (prob < minProbForChange && nOfstepsWithoutImprovement > maxNOfstepsWithoutValueImprovement)
                 done = true;
-                
         }
         nOfSteps++;
         stepsWthoutCChange++;
@@ -508,26 +508,26 @@ int SW2(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 int Tabu(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 {
 
-    int max_neighbour = (nOfCities*(nOfCities-1))/2;
+    int max_neighbour = (nOfCities * (nOfCities - 1)) / 2;
     PairV<int> *neighbour_choices = new PairV<int>[max_neighbour];
     int n_c_it = 0;
     int no_change_diff = 0;
 
-    int analyzed_neighbours =  nOfCities/10; ///1 sąsiad  2-4 
+    int analyzed_neighbours = nOfCities / 10; ///1 sąsiad  2-4
 
-    int sizeOfTabu = nOfCities/4; // 4 tabu 2-4 
+    int sizeOfTabu = nOfCities / 4; // 4 tabu 2-4
     int tabuIt = 0;
     int possible_value = 0;
     PairV<int> *tabu = new PairV<int>[sizeOfTabu];
 
     int max_val = 0;
     int p = 10;
-    int l =max_neighbour;
-    int max_repetition = l*p ; // L = (nOfCities^2)/2 
+    int l = max_neighbour;
+    int max_repetition = l * p; // L = (nOfCities^2)/2
 
     // std::cout<<"analyzed_neighbours: "<<analyzed_neighbours<<std::endl;
     // std::cout<<"sizeOfTabu: "<<sizeOfTabu<<std::endl;
-    
+
     // initial random permutation
     int *currentPermutation = RandomPermutation(nOfCities);
     int *currentDistancesArray = GetArrayOfDistances(currentPermutation, nOfCities, distanceMatrix);
@@ -540,86 +540,98 @@ int Tabu(Matrix distanceMatrix, int nOfCities, ResultStruct &resultStruct)
 
     delete[] currentDistancesArray;
     int bestPermutationValue = currentPermutationValue;
-    bool done = false;    
+    bool done = false;
     int nOfSteps = 0;
     int nOfAllCheckedResults = 0;
     int it = 0;
-    
-    for(int i=0;i<sizeOfTabu;i++){
-        tabu[i] = PairV(0,0,-10000);
+
+    for (int i = 0; i < sizeOfTabu; i++)
+    {
+        tabu[i] = PairV(0, 0, -10000);
     }
 
-    while (no_change_diff<max_repetition)
+    while (no_change_diff < max_repetition)
     {
-        done=false;
+        done = false;
         n_c_it = 0;
         for (int i = 0; i < nOfCities; i++)
         {
             for (int j = 1 + i; j < nOfCities; j++)
             {
                 possible_value = ComputePossibleValue(currentPermutation, 0, distanceMatrix, Pair<int>(i, j), nOfCities);
-                neighbour_choices[n_c_it] = PairV(i,j,possible_value);
+                neighbour_choices[n_c_it] = PairV(i, j, possible_value);
                 n_c_it++;
-                nOfAllCheckedResults++;              
-            }                
+                nOfAllCheckedResults++;
+            }
         }
-        no_change_diff+=max_neighbour-analyzed_neighbours;
+        no_change_diff += max_neighbour - analyzed_neighbours;
         n_c_it = 0;
-        std::sort (neighbour_choices,neighbour_choices+max_neighbour, comparePairV);
+        std::sort(neighbour_choices, neighbour_choices + max_neighbour, comparePairV);
         // printTabu(neighbour_choices,analyzed_neighbours,0);
         // exit(0);
-        max_val = neighbour_choices[analyzed_neighbours-1].value;
-        
-        while(!done && n_c_it < analyzed_neighbours){
+        max_val = neighbour_choices[analyzed_neighbours - 1].value;
 
-            for(int i=n_c_it; i<analyzed_neighbours;i++){
-                if ((notOnTabuList(tabu,sizeOfTabu,neighbour_choices[i]))||(bestPermutationValue> (currentPermutationValue + neighbour_choices[i].value))){
-                    
-                    if (neighbour_choices[i].value <= max_val){
+        while (!done && n_c_it < analyzed_neighbours)
+        {
+
+            for (int i = n_c_it; i < analyzed_neighbours; i++)
+            {
+                if ((notOnTabuList(tabu, sizeOfTabu, neighbour_choices[i])) || (bestPermutationValue > (currentPermutationValue + neighbour_choices[i].value)))
+                {
+
+                    if (neighbour_choices[i].value <= max_val)
+                    {
                         std::swap(currentPermutation[neighbour_choices[i].first], currentPermutation[neighbour_choices[i].second]);
                         currentPermutationValue = currentPermutationValue + neighbour_choices[i].value;
 
-                        pushTabu(tabu,sizeOfTabu,tabuIt,PairV(neighbour_choices[i].first,neighbour_choices[i].second,neighbour_choices[i].value));
+                        pushTabu(tabu, sizeOfTabu, tabuIt, PairV(neighbour_choices[i].first, neighbour_choices[i].second, neighbour_choices[i].value));
                         tabuIt--;
 
-                        if (currentPermutationValue < bestPermutationValue){
-                            bestPermutationValue=currentPermutationValue;
+                        if (currentPermutationValue < bestPermutationValue)
+                        {
+                            bestPermutationValue = currentPermutationValue;
                             if ((resultStruct.iterationNumber != -1))
                             {
                                 std::copy(currentPermutation, currentPermutation + nOfCities, bestPermutation);
                             }
-                            no_change_diff=0;
+                            no_change_diff = 0;
                         }
-                        else{
+                        else
+                        {
                             no_change_diff++;
                         }
-                        if (n_c_it!=i){
-                            std::swap(neighbour_choices[i],neighbour_choices[n_c_it]);
+                        if (n_c_it != i)
+                        {
+                            std::swap(neighbour_choices[i], neighbour_choices[n_c_it]);
                         }
-                    }else{
+                    }
+                    else
+                    {
                         no_change_diff++;
                         done = true;
-                    }                    
+                    }
                     n_c_it++;
                     break;
                 }
-                else {
-                    n_c_it ++;
-                    no_change_diff++;                
+                else
+                {
+                    n_c_it++;
+                    no_change_diff++;
                 }
             }
 
-            if(!done){
-                for(int i=n_c_it;i<analyzed_neighbours;i++){
+            if (!done)
+            {
+                for (int i = n_c_it; i < analyzed_neighbours; i++)
+                {
                     neighbour_choices[i].value = ComputePossibleValue(currentPermutation, 0, distanceMatrix,
-                                                       Pair<int>(neighbour_choices[i].first, neighbour_choices[i].second), nOfCities);
+                                                                      Pair<int>(neighbour_choices[i].first, neighbour_choices[i].second), nOfCities);
                     nOfAllCheckedResults++;
                 }
-                std::sort (neighbour_choices+n_c_it,neighbour_choices+analyzed_neighbours, comparePairV);
-
-            }                    
-        }        
-    }   
+                std::sort(neighbour_choices + n_c_it, neighbour_choices + analyzed_neighbours, comparePairV);
+            }
+        }
+    }
     // std::cout<<"BEST PERM: "<<bestPermutationValue<<std::endl;
     if (resultStruct.iterationNumber != -1)
     {

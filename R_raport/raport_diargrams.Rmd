@@ -23,8 +23,8 @@ print(getwd())
 
 ## Wczytanie danych
 ```{r load_data}
-results <- read.table("./../results/results_SW_wzor_0001.csv", head=TRUE, sep=",")
-algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalk="RW", SW="SW")
+results <- read.table("./../results/results_Tabu.csv", head=TRUE, sep=",")
+algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalk="RW", SW="SW", Tabu="TS")
 results <- mutate(results, algName=algs_symbols[algName])
 algs_unique_names <- unique(results[["algName"]])
 results <- as.data.frame(lapply(results, unlist))
@@ -44,7 +44,7 @@ permutationToVector <- function(permutation)
   vectorPermutationIntegers
 }
 
-colors = c(G="#ff0000", S="#04ff00", R="#0004ff", RW="#ff9d00", H="#ff00fb", SW="#42f5e3")
+colors = c(G="#ff0000", S="#04ff00", R="#0004ff", RW="#ff9d00", H="#ff00fb", SW="#42f5e3", TS="#d1a924")
 ```
 
 ## Zadanie 2 - punkt 1 - srednie wyniki - WSPOLNY WYKRES
