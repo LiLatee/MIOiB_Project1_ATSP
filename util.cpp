@@ -82,7 +82,41 @@ struct Pair
         }
     }
 };
+template <typename T>
+struct PairV
+{
+    T first;
+    T second;
+    T value;
 
+    PairV()
+    {
+        this->first = T();
+        this->second = T();
+        this->value = T();
+    }
+    PairV(T first, T second, T value)
+    {
+        this->first = first;
+        this->second = second;
+        this->value = value;
+    }
+
+    T &operator[](int index)
+    {
+        if (index == 0)
+            return this->first;
+        else if (index == 1)
+            return this->second;
+        else if (index == 2)
+            return this->value;
+        else
+        {
+            std::cout << "Object pair has only 0, 1 and 2 indexes.";
+            exit(0);
+        }
+    }
+};
 // TODO gdzieś to jest używane?
 // template <class T>
 // std::ostream &operator<<(std::ostream &os, const std::vector<T> &v)
@@ -323,5 +357,7 @@ void LoadOptimalResults(std::string const filepath, std::map<std::string, int> &
     }
 }
 
+
+bool comparePairV (PairV<int> i,PairV<int> j) { return (i.value<j.value); }
 
 #endif

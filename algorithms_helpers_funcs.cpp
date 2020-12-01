@@ -268,4 +268,27 @@ float getInitCValue(float factor, int diff)
     return (-diff)/std::log(factor);
 }
 
+void printTabu(PairV<int> tabu[], int sizeOfTabu,int tabuIt){
+    std::cout<<"TABU:"<<std::endl;
+    int m = modulo(tabuIt,sizeOfTabu);
+    for(int i = 0; i< sizeOfTabu;i++){
+        std::cout<<tabu[(i+m )%sizeOfTabu].first<<" : "<<tabu[(i+m )%sizeOfTabu].second<<" : "<<tabu[(i+m )%sizeOfTabu].value<<std::endl;
+    }
+}
+
+void pushTabu(PairV<int> tabu[], int sizeOfTabu,int tabuIt, PairV<int> ntabu){
+    // std::cout<<tabuIt<<std::endl;
+    int m = modulo(tabuIt-1,sizeOfTabu);
+    // std::cout<<"MODULO:"<<m<<std::endl;
+    tabu[m]=ntabu;
+}
+bool notOnTabuList(PairV<int> tabu[], int sizeOfTabu,PairV<int> ntabu){
+    for(int i=0;i<sizeOfTabu;i++){
+        if((tabu[i].first == ntabu.first)&&(tabu[i].second == ntabu.second)){
+            return false;
+        }
+    }
+    return true;
+}
+
 #endif

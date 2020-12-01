@@ -26,6 +26,7 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         double greedyTime = MeasureTimeOfFunctionInMilliSeconds(1, "Greedy", Greedy, distanceMatrix, nOfCities, result);
         double steepestTime = MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities, result);
         double SWTime = MeasureTimeOfFunctionInMilliSeconds(1, "SW", SW, distanceMatrix, nOfCities, result);
+        double TabuTime = MeasureTimeOfFunctionInMilliSeconds(1, "Tabu", Tabu, distanceMatrix, nOfCities, result);
         // double SW2Time = MeasureTimeOfFunctionInMilliSeconds(1, "SW2", SW2, distanceMatrix, nOfCities, result);
 
         double simpleHeurTime = MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities, result);
@@ -136,6 +137,21 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         //     SW2Results.push_back(result);
         // }
         // SaveResultsToCSV(SW2Results, resultsFilePath);
+        
+        vector<ResultStruct> TabuResults;
+        for (size_t i = 0; i < nOfIterations; i++)
+        {
+            ResultStruct result;
+            result.setName = setName;
+            result.algName = "Tabu";
+            result.nOfCities = nOfCities;
+            result.iterationNumber = i;
+            result.optimalResult = optimalResults[setName];
+            result.timeOfRunningInMs = TabuTime;
+            SW(distanceMatrix, nOfCities, result);
+            TabuResults.push_back(result);
+        }
+        SaveResultsToCSV(TabuResults, resultsFilePath);
 
         // TODO to samo dla SimpleHeur, R i RW dodać
     }
