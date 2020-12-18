@@ -23,11 +23,17 @@ print(getwd())
 
 ## Wczytanie danych
 ```{r load_data}
-results <- read.table("./../results/results_Tabu.csv", head=TRUE, sep=",")
+results <- read.table("./../results/results_SW_TS_10.csv", head=TRUE, sep=",")
 algs_symbols <- list(Greedy="G", Steepest="S", SimpleHeur="H", Random="R", RandomWalk="RW", SW="SW", Tabu="TS")
 results <- mutate(results, algName=algs_symbols[algName])
 algs_unique_names <- unique(results[["algName"]])
 results <- as.data.frame(lapply(results, unlist))
+
+# filterek
+# algs = c("G", "S", "H", "TS", "SW")
+# results <- filter(results, algName %in% algs)
+#######################
+
 knitr::kable(head(results, 21))
 ```
 ## Funckje pomocnicze

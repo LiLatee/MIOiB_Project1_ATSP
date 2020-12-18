@@ -258,6 +258,9 @@ int genMaxDiffValueInSamples(Matrix distanceMatrix, int nOfCities, int nOfSample
             maxValue = diff;
         else if(diff < minValue)
             minValue = diff;
+
+        delete[] permutation;
+        delete[] distancesArray;
     }
 
     return abs(minValue - maxValue);

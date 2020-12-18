@@ -18,20 +18,17 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         std::string setName = entry.path().stem();
         std::cout << "Set: \t " << setName << std::endl;
         int nOfCities;
-        std::string path ="/mnt/d/Dokumenty/Uczelnia/MIOiB/Project1_ATSP/data/unpacked_ready/chosen_sets/p43.atsp";
         Matrix distanceMatrix = LoadData(entry.path(), nOfCities);
 
         ResultStruct result;
-        // mierzymy czas, aby Random i RandomWalker miały mniej więcej tyle samu czasu.
         double greedyTime = MeasureTimeOfFunctionInMilliSeconds(1, "Greedy", Greedy, distanceMatrix, nOfCities, result);
         double steepestTime = MeasureTimeOfFunctionInMilliSeconds(1, "Steepest", Steepest, distanceMatrix, nOfCities, result);
         double SWTime = MeasureTimeOfFunctionInMilliSeconds(1, "SW", SW, distanceMatrix, nOfCities, result);
         double TabuTime = MeasureTimeOfFunctionInMilliSeconds(1, "Tabu", Tabu, distanceMatrix, nOfCities, result);
-        // double SW2Time = MeasureTimeOfFunctionInMilliSeconds(1, "SW2", SW2, distanceMatrix, nOfCities, result);
-
         double simpleHeurTime = MeasureTimeOfFunctionInMilliSeconds(1, "SimpleHeur", SimpleHeur, distanceMatrix, nOfCities, result);
-        // double timeInMillisecForRandoms = (greedyTime + steepestTime) / (2);
-        // std::cout << "timeInMillisecForRandoms: " << timeInMillisecForRandoms << std::endl;
+        // mierzymy czas, aby Random i RandomWalker miały mniej więcej tyle samu czasu, co Greedy i Steepest
+        double timeInMillisecForRandoms = (greedyTime + steepestTime) / (2);
+        std::cout << "timeInMillisecForRandoms: " << timeInMillisecForRandoms << std::endl;
 
         vector<ResultStruct> steepestResults;
         for (size_t i = 0; i < nOfIterations; i++)
@@ -78,35 +75,35 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         }
         SaveResultsToCSV(simpleHeurResults, resultsFilePath);
 
-        // vector<ResultStruct> randomResults;
-        // for (size_t i = 0; i < nOfIterations; i++)
-        // {
-        //     ResultStruct result;
-        //     result.setName = setName;
-        //     result.algName = "Random";
-        //     result.nOfCities = nOfCities;
-        //     result.iterationNumber = i;
-        //     result.optimalResult = optimalResults[setName];
-        //     result.timeOfRunningInMs = timeInMillisecForRandoms;
-        //     Random(distanceMatrix, nOfCities, timeInMillisecForRandoms, result);
-        //     randomResults.push_back(result);
-        // }
-        // SaveResultsToCSV(randomResults, resultsFilePath);
+        vector<ResultStruct> randomResults;
+        for (size_t i = 0; i < nOfIterations; i++)
+        {
+            ResultStruct result;
+            result.setName = setName;
+            result.algName = "Random";
+            result.nOfCities = nOfCities;
+            result.iterationNumber = i;
+            result.optimalResult = optimalResults[setName];
+            result.timeOfRunningInMs = timeInMillisecForRandoms;
+            Random(distanceMatrix, nOfCities, timeInMillisecForRandoms, result);
+            randomResults.push_back(result);
+        }
+        SaveResultsToCSV(randomResults, resultsFilePath);
 
-        // vector<ResultStruct> randomWalkResults;
-        // for (size_t i = 0; i < nOfIterations; i++)
-        // {
-        //     ResultStruct result;
-        //     result.setName = setName;
-        //     result.algName = "RandomWalk";
-        //     result.nOfCities = nOfCities;
-        //     result.iterationNumber = i;
-        //     result.optimalResult = optimalResults[setName];
-        //     result.timeOfRunningInMs = timeInMillisecForRandoms;
-        //     RandomWalk(distanceMatrix, nOfCities, timeInMillisecForRandoms, result);
-        //     randomWalkResults.push_back(result);
-        // }
-        // SaveResultsToCSV(randomWalkResults, resultsFilePath);
+        vector<ResultStruct> randomWalkResults;
+        for (size_t i = 0; i < nOfIterations; i++)
+        {
+            ResultStruct result;
+            result.setName = setName;
+            result.algName = "RandomWalk";
+            result.nOfCities = nOfCities;
+            result.iterationNumber = i;
+            result.optimalResult = optimalResults[setName];
+            result.timeOfRunningInMs = timeInMillisecForRandoms;
+            RandomWalk(distanceMatrix, nOfCities, timeInMillisecForRandoms, result);
+            randomWalkResults.push_back(result);
+        }
+        SaveResultsToCSV(randomWalkResults, resultsFilePath);
 
         vector<ResultStruct> SWResults;
         for (size_t i = 0; i < nOfIterations; i++)
@@ -123,20 +120,6 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         }
         SaveResultsToCSV(SWResults, resultsFilePath);
 
-        // vector<ResultStruct> SW2Results;
-        // for (size_t i = 0; i < nOfIterations; i++)
-        // {
-        //     ResultStruct result;
-        //     result.setName = setName;
-        //     result.algName = "SW2";
-        //     result.nOfCities = nOfCities;
-        //     result.iterationNumber = i;
-        //     result.optimalResult = optimalResults[setName];
-        //     result.timeOfRunningInMs = SW2Time;
-        //     SW2(distanceMatrix, nOfCities, result);
-        //     SW2Results.push_back(result);
-        // }
-        // SaveResultsToCSV(SW2Results, resultsFilePath);
         
         vector<ResultStruct> TabuResults;
         for (size_t i = 0; i < nOfIterations; i++)
@@ -153,7 +136,6 @@ void RunTests(const string setsPath, const string resultsFilePath, const int nOf
         }
         SaveResultsToCSV(TabuResults, resultsFilePath);
 
-        // TODO to samo dla SimpleHeur, R i RW dodać
     }
 }
 
